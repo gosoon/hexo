@@ -107,6 +107,7 @@ podManager 提供了接口来存储和访问 pod 的信息，维持 static pod �
 
 在 v1.12 中，kubelet 组件有18个 manager：
 
+```
 certificateManager
 cgroupManager
 containerManager
@@ -125,6 +126,7 @@ secretManager
 statusManager
 volumeManager	
 tokenManager
+```
 
 其中比较重要的模块后面会进行一一分析。
 
