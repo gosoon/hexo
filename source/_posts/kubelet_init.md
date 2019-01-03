@@ -72,9 +72,12 @@ NewKubeletCommand() 函数主要负责获取配置文件中的参数，校验参
 ```
 // NewKubeletCommand creates a *cobra.Command object with default parameters
 func NewKubeletCommand(stopCh <-chan struct{}) *cobra.Command {
-	cleanFlagSet := pflag.NewFlagSet(componentKubelet, pflag.ContinueOnError)
-	cleanFlagSet.SetNormalizeFunc(flag.WordSepNormalizeFunc)
-	kubeletFlags := options.NewKubeletFlags()
+    cleanFlagSet := pflag.NewFlagSet(componentKubelet, pflag.ContinueOnError)
+    cleanFlagSet.SetNormalizeFunc(flag.WordSepNormalizeFunc)
+    // Kubelet配置分两部分:
+    // KubeletFlag: 指那些不允许在 kubelet 运行时进行修改的配置集，或者不能在集群中各个 Nodes 之间共享的配置集。
+    // KubeletConfiguration: 指可以在集群中各个Nodes之间共享的配置集，可以进行动态配置。
+    kubeletFlags := options.NewKubeletFlags()
 	kubeletConfig, err := options.NewKubeletConfiguration()
 	...
 	cmd := &cobra.Command{
