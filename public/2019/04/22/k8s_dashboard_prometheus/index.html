@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="metrics-server,">
+  <meta name="keywords" content="kube-dashboard,prometheus,">
 
 
 
@@ -79,18 +79,23 @@
 
 
 
-<meta name="description" content="metrics-server 是一个采集集群中指标的组件，类似于 cadvisor，在 v1.8 版本中引入，官方将其作为 heapster 的替代者，metric-server 属于 core metrics(核心指标)，提供 API metrics.k8s.io，仅可以查看 node、pod 当前 CPU/Memory/Storage 的资源使用情况，也支持通过 Metrics API 的形式">
-<meta name="keywords" content="metrics-server">
+<meta name="description" content="随着 kubernetes 的大规模使用，对 kubernetes 组件及其上运行服务的监控也是非常重要的一个环节，目前开源的监控组件有很多种，例如 cAdvisor、Heapster、metrics-server、kube-state-metrics、Prometheus 等，对监控数据的可视化查看组件有 Dashboard、 Prometheus、Grafana 等，本文会介绍 kube-da">
+<meta name="keywords" content="kube-dashboard,prometheus">
 <meta property="og:type" content="article">
-<meta property="og:title" content="kubernetes 指标采集组件 metrics-server 的部署">
-<meta property="og:url" content="http://yoursite.com/2019/04/14/k8s_metrics_server/index.html">
+<meta property="og:title" content="部署 kubernetes 可视化监控组件">
+<meta property="og:url" content="http://yoursite.com/2019/04/22/k8s_dashboard_prometheus/index.html">
 <meta property="og:site_name" content="田飞雨">
-<meta property="og:description" content="metrics-server 是一个采集集群中指标的组件，类似于 cadvisor，在 v1.8 版本中引入，官方将其作为 heapster 的替代者，metric-server 属于 core metrics(核心指标)，提供 API metrics.k8s.io，仅可以查看 node、pod 当前 CPU/Memory/Storage 的资源使用情况，也支持通过 Metrics API 的形式">
+<meta property="og:description" content="随着 kubernetes 的大规模使用，对 kubernetes 组件及其上运行服务的监控也是非常重要的一个环节，目前开源的监控组件有很多种，例如 cAdvisor、Heapster、metrics-server、kube-state-metrics、Prometheus 等，对监控数据的可视化查看组件有 Dashboard、 Prometheus、Grafana 等，本文会介绍 kube-da">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-04-14T13:30:56.000Z">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1262158-5fefdb4cfa190543.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1262158-4888de572ff9a0c9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1262158-58e439a2407773ca.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/1262158-b97f2279fadbd3a1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2019-04-22T14:44:44.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="kubernetes 指标采集组件 metrics-server 的部署">
-<meta name="twitter:description" content="metrics-server 是一个采集集群中指标的组件，类似于 cadvisor，在 v1.8 版本中引入，官方将其作为 heapster 的替代者，metric-server 属于 core metrics(核心指标)，提供 API metrics.k8s.io，仅可以查看 node、pod 当前 CPU/Memory/Storage 的资源使用情况，也支持通过 Metrics API 的形式">
+<meta name="twitter:title" content="部署 kubernetes 可视化监控组件">
+<meta name="twitter:description" content="随着 kubernetes 的大规模使用，对 kubernetes 组件及其上运行服务的监控也是非常重要的一个环节，目前开源的监控组件有很多种，例如 cAdvisor、Heapster、metrics-server、kube-state-metrics、Prometheus 等，对监控数据的可视化查看组件有 Dashboard、 Prometheus、Grafana 等，本文会介绍 kube-da">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/1262158-5fefdb4cfa190543.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 
 
@@ -120,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/04/14/k8s_metrics_server/">
+  <link rel="canonical" href="http://yoursite.com/2019/04/22/k8s_dashboard_prometheus/">
 
 
 
 
 
-  <title>kubernetes 指标采集组件 metrics-server 的部署 | 田飞雨</title>
+  <title>部署 kubernetes 可视化监控组件 | 田飞雨</title>
   
 
 
@@ -290,12 +295,12 @@
   
   
 
-  <article class="post post-type-metrics-server" itemscope="" itemtype="http://schema.org/Article">
+  <article class="post post-type-kubernetes" itemscope="" itemtype="http://schema.org/Article">
   
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/14/k8s_metrics_server/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/22/k8s_dashboard_prometheus/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="tianfeiyu">
@@ -312,7 +317,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">kubernetes 指标采集组件 metrics-server 的部署</h1>
+          <h1 class="post-title" itemprop="name headline">部署 kubernetes 可视化监控组件</h1>
         
 
         <div class="post-meta">
@@ -324,8 +329,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-14T21:27:30+08:00">
-                2019-04-14
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-22T22:43:30+08:00">
+                2019-04-22
               </time>
             
 
@@ -343,8 +348,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/04/14/k8s_metrics_server/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count gitment-comments-count" data-xid="/2019/04/14/k8s_metrics_server/" itemprop="commentsCount"></span>
+                <a href="/2019/04/22/k8s_dashboard_prometheus/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2019/04/22/k8s_dashboard_prometheus/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -372,35 +377,40 @@
       
 
       
-        <p><a href="https://github.com/kubernetes-incubator/metrics-server" target="_blank" rel="noopener">metrics-server</a> 是一个采集集群中指标的组件，类似于 cadvisor，在 v1.8 版本中引入，官方将其作为 heapster 的替代者，metric-server 属于 core metrics(核心指标)，提供 API metrics.k8s.io，仅可以查看 node、pod 当前 CPU/Memory/Storage 的资源使用情况，也支持通过 Metrics API 的形式获取，以此数据提供给 Dashboard、HPA、scheduler 等使用。</p>
-<h4 id="一、开启-API-Aggregation"><a href="#一、开启-API-Aggregation" class="headerlink" title="一、开启 API Aggregation"></a>一、开启 API Aggregation</h4><p>由于 metrics-server 需要暴露 API，但 k8s 的 API 要统一管理，如何将 apiserver 的请求转发给 metrics-server ，解决方案就是使用 <a href="https://github.com/kubernetes/kube-aggregator" target="_blank" rel="noopener">kube-aggregator</a> ，所以在部署 metrics-server 之前，需要在 kube-apiserver 中开启 API Aggregation，即增加以下配置：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">--proxy-client-cert-file=/etc/kubernetes/certs/proxy.crt</span><br><span class="line">--proxy-client-key-file=/etc/kubernetes/certs/proxy.key</span><br><span class="line">--requestheader-client-ca-file=/etc/kubernetes/certs/proxy-ca.crt</span><br><span class="line">--requestheader-allowed-names=aggregator</span><br><span class="line">--requestheader-extra-headers-prefix=X-Remote-Extra-</span><br><span class="line">--requestheader-group-headers=X-Remote-Group</span><br><span class="line">--requestheader-username-headers=X-Remote-User</span><br></pre></td></tr></table></figure>
-<p>如果kube-proxy没有在Master上面运行，还需要配置</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--enable-aggregator-routing=true</span><br></pre></td></tr></table></figure>
-<p><a href="https://github.com/kubernetes/kube-aggregator" target="_blank" rel="noopener">kube-aggregator</a>  的详细设计文档请参考：<a href="https://kubernetes.io/docs/tasks/access-kubernetes-api/configure-aggregation-layer/" target="_blank" rel="noopener">configure-aggregation-layer</a></p>
-<h4 id="二、部署-metrics-server"><a href="#二、部署-metrics-server" class="headerlink" title="二、部署 metrics-server"></a>二、部署 metrics-server</h4><h5 id="1、获取配置文件"><a href="#1、获取配置文件" class="headerlink" title="1、获取配置文件"></a>1、获取配置文件</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git clone  https://github.com/kubernetes/kubernetes</span><br><span class="line">$ cd  kubernetes/cluster/addons/metrics-server/</span><br></pre></td></tr></table></figure>
-<h5 id="2、修改-metrics-server-配置参数"><a href="#2、修改-metrics-server-配置参数" class="headerlink" title="2、修改 metrics-server 配置参数"></a>2、修改 metrics-server 配置参数</h5><p>修改 <code>resource-reader.yaml</code> 文件：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">rules:</span><br><span class="line">- apiGroups:</span><br><span class="line">  - &quot;&quot;</span><br><span class="line">  resources:</span><br><span class="line">  - pods</span><br><span class="line">  - nodes</span><br><span class="line">  - nodes/stats    #新增这一行</span><br><span class="line">  - namespaces</span><br><span class="line">  verbs:</span><br><span class="line">  - get</span><br><span class="line">  - list</span><br><span class="line">  - watch</span><br></pre></td></tr></table></figure>
-<p>修改 <code>metrics-server-deployment.yaml</code>文件:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">     ......</span><br><span class="line">     # metrics-server containers 启动参数作如下修改：</span><br><span class="line">     containers:</span><br><span class="line">     - name: metrics-server</span><br><span class="line">       image: k8s.gcr.io/metrics-server-amd64:v0.3.1</span><br><span class="line">       command:</span><br><span class="line">       - /metrics-server</span><br><span class="line">       - --metric-resolution=30s</span><br><span class="line">       - --kubelet-insecure-tls</span><br><span class="line">       - --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP</span><br><span class="line">       # These are needed for GKE, which doesn&apos;t support secure communication yet.</span><br><span class="line">       # Remove these lines for non-GKE clusters, and when GKE supports token-based auth.</span><br><span class="line">       #- --kubelet-port=10255</span><br><span class="line">       #- --deprecated-kubelet-completely-insecure=true</span><br><span class="line">			</span><br><span class="line">......           </span><br><span class="line"># 修改启动参数：</span><br><span class="line">       command:</span><br><span class="line">         - /pod_nanny</span><br><span class="line">         - --config-dir=/etc/config</span><br><span class="line">         - --cpu=80m</span><br><span class="line">         - --extra-cpu=0.5m</span><br><span class="line">         - --memory=80Mi</span><br><span class="line">         - --extra-memory=8Mi</span><br><span class="line">         - --threshold=5</span><br><span class="line">         - --deployment=metrics-server-v0.3.1</span><br><span class="line">         - --container=metrics-server</span><br><span class="line">         - --poll-period=300000</span><br><span class="line">         - --estimator=exponential</span><br><span class="line">         # Specifies the smallest cluster (defined in number of nodes)</span><br><span class="line">         # resources will be scaled to.</span><br><span class="line">         #- --minClusterSize=&#123;&#123; metrics_server_min_cluster_size &#125;&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="3、部署"><a href="#3、部署" class="headerlink" title="3、部署"></a>3、部署</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f .</span><br></pre></td></tr></table></figure>
-<p>metrics-server 的资源占用量会随着集群中的 Pod 数量的不断增长而不断上升，因此需要 addon-resizer 垂直扩缩 metrics-server。addon-resizer 依据集群中节点的数量线性地扩展 metrics-server，以保证其能够有能力提供完整的metrics API 服务，具体参考：<a href="https://github.com/kubernetes/autoscaler/tree/master/addon-resizer" target="_blank" rel="noopener">addon-resizer</a>。</p>
+        <p>随着 kubernetes 的大规模使用，对 kubernetes 组件及其上运行服务的监控也是非常重要的一个环节，目前开源的监控组件有很多种，例如 cAdvisor、Heapster、metrics-server、kube-state-metrics、Prometheus 等，对监控数据的可视化查看组件有 Dashboard、 Prometheus、Grafana 等，本文会介绍 kube-dashboard 和基于 prometheus 搭建数据可视化监控。</p>
 <blockquote>
-<p> 所需要的镜像可以在 <a href="https://github.com/gosoon/k8s-system-images.git" target="_blank" rel="noopener">k8s-system-images</a>  中下载。</p>
+<p>kubernetes 版本：v1.12</p>
 </blockquote>
-<p>检查是否部署成功：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get apiservices | grep metrics</span><br><span class="line">v1beta1.metrics.k8s.io     kube-system/metrics-server   True        2m</span><br><span class="line"></span><br><span class="line">$ kubectl get pod -n kube-system</span><br><span class="line">metrics-server-v0.3.1-65b6db6945-rpqwf   2/2     Running   0          20h</span><br></pre></td></tr></table></figure>
-<h4 id="三、metrics-server-的使用"><a href="#三、metrics-server-的使用" class="headerlink" title="三、metrics-server 的使用"></a>三、metrics-server 的使用</h4><p>由于采集数据间隔为1分钟，等待数分钟后查看数据：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl top node</span><br><span class="line">NAME             CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%</span><br><span class="line">node1            108m         2%     1532Mi          40%</span><br><span class="line"></span><br><span class="line">$ kubectl top pod -n kube-system</span><br><span class="line">NAME                                     CPU(cores)   MEMORY(bytes)</span><br><span class="line">coredns-576cbf47c7-8v6n8                 2m           14Mi</span><br><span class="line">coredns-576cbf47c7-qk7rk                 2m           10Mi</span><br><span class="line">etcd-node1                               11m          80Mi</span><br><span class="line">kube-apiserver-node1                     17m          566Mi</span><br><span class="line">kube-controller-manager-node1            17m          67Mi</span><br><span class="line">kube-flannel-ds-amd64-8lvs2              2m           13Mi</span><br><span class="line">kube-proxy-85lhl                         3m           19Mi</span><br><span class="line">kube-scheduler-node1                     5m           16Mi</span><br><span class="line">metrics-server-v0.3.1-65b6db6945-rpqwf   2m           19Mi</span><br></pre></td></tr></table></figure>
-<p>Metrics-server 可用 <a href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/instrumentation/resource-metrics-api.md" target="_blank" rel="noopener">API</a> 列表如下：</p>
-<ul>
-<li><code>http://127.0.0.1:8001/apis/metrics.k8s.io/v1beta1/nodes</code></li>
-<li><code>http://127.0.0.1:8001/apis/metrics.k8s.io/v1beta1/nodes/&lt;node-name&gt;</code></li>
-<li><code>http://127.0.0.1:8001/apis/metrics.k8s.io/v1beta1/pods</code></li>
-<li><code>http://127.0.0.1:8001/apis/metrics.k8s.io/v1beta1/namespace/&lt;namespace-name&gt;/pods/&lt;pod-name&gt;</code></li>
-</ul>
-<p>由于 k8s 在 v1.10 后废弃了 8080 端口，可以通过代理或者使用认证的方式访问这些 API：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl proxy</span><br><span class="line">$ curl http://127.0.0.1:8001/apis/metrics.k8s.io/v1beta1/nodes</span><br></pre></td></tr></table></figure></p>
-<p>也可以直接通过 kubectl 命令来访问这些 API，比如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get --raw /apis/metrics.k8s.io/v1beta1/nodes</span><br><span class="line">$ kubectl get --raw /apis/metrics.k8s.io/v1beta1/pods</span><br><span class="line">$ kubectl get --raw /apis/metrics.k8s.io/v1beta1/nodes/&lt;node-name&gt;</span><br><span class="line">$ kubectl get --raw /apis/metrics.k8s.io/v1beta1/namespace/&lt;namespace-name&gt;/pods/&lt;pod-name&gt;</span><br></pre></td></tr></table></figure></p>
+<h3 id="一、kubernetes-dashboard-的部署"><a href="#一、kubernetes-dashboard-的部署" class="headerlink" title="一、kubernetes-dashboard 的部署"></a>一、kubernetes-dashboard 的部署</h3><h4 id="1、创建-kubernetes-dashboard"><a href="#1、创建-kubernetes-dashboard" class="headerlink" title="1、创建 kubernetes-dashboard"></a>1、创建 kubernetes-dashboard</h4><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl apply -f https:<span class="comment">//raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml</span></span><br><span class="line"></span><br><span class="line">$ kubectl get svc -n kube-system | grep kubernetes-dashboard</span><br><span class="line">kubernetes-dashboard   ClusterIP    <span class="number">10.101</span><span class="number">.203</span><span class="number">.44</span>   &lt;none&gt;        <span class="number">443</span>/TCP    <span class="number">2</span>h</span><br><span class="line"></span><br><span class="line">$ kubectl get pod -n kube-system | grep kubernetes-dashboard</span><br><span class="line">kubernetes-dashboard<span class="number">-65</span>c76f6c97<span class="number">-8</span>npsv    <span class="number">1</span>/<span class="number">1</span>     Running       <span class="number">0</span>          <span class="number">2</span>h</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>所需镜像下载地址：<a href="https://github.com/gosoon/k8s-system-images" target="_blank" rel="noopener">k8s-system-images</a></p>
+</blockquote>
+<h4 id="2、使用-nodePort-方式访问-kubernetes-dashboard"><a href="#2、使用-nodePort-方式访问-kubernetes-dashboard" class="headerlink" title="2、使用 nodePort 方式访问 kubernetes-dashboard"></a>2、使用 nodePort 方式访问 kubernetes-dashboard</h4><p>nodeport 的访问方式虽然有性能损失但是比较简单，kubernetes-dashboard 默认使用 clusterIP 的方式暴露服务，修改 kubernetes-dashboard svc 使用 nodePort 方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl edit svc -n kube-system</span><br><span class="line">	...</span><br><span class="line">  spec:</span><br><span class="line">    clusterIP: 10.101.203.44</span><br><span class="line">    externalTrafficPolicy: Cluster</span><br><span class="line">    ports:</span><br><span class="line">    - nodePort: 8004  // 添加 nodeport 端口</span><br><span class="line">      port: 443</span><br><span class="line">      protocol: TCP</span><br><span class="line">      targetPort: 8443</span><br><span class="line">    selector:</span><br><span class="line">      k8s-app: kubernetes-dashboard</span><br><span class="line">    sessionAffinity: None</span><br><span class="line">    type: NodePort   // 将 ClusterIP 修改为 NodePort</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>nodePort 端口默认为 30000-32767，若使用其他端口，需要修改 apiserver 的启动参数 <code>--service-node-port-range</code> 来指定 nodePort 范围，如：<code>--service-node-port-range 8000-9000</code>。</p>
+<h4 id="3、创建-kubernetes-dashboard-管理员角色"><a href="#3、创建-kubernetes-dashboard-管理员角色" class="headerlink" title="3、创建 kubernetes-dashboard 管理员角色"></a>3、创建 kubernetes-dashboard 管理员角色</h4><p> <code>kubernetes-dashboard-admin.yaml</code>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: ServiceAccount</span><br><span class="line">metadata:</span><br><span class="line">  name: dashboard-admin</span><br><span class="line">  namespace: kube-system</span><br><span class="line">---</span><br><span class="line">kind: ClusterRoleBinding</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</span><br><span class="line">metadata:</span><br><span class="line">  name: dashboard-admin</span><br><span class="line">subjects:</span><br><span class="line">  - kind: ServiceAccount</span><br><span class="line">    name: dashboard-admin</span><br><span class="line">    namespace: kube-system</span><br><span class="line">roleRef:</span><br><span class="line">  kind: ClusterRole</span><br><span class="line">  name: cluster-admin</span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br></pre></td></tr></table></figure>
+<p>创建角色并获取 token：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl apply -f kubernetes-dashboard-admin.yaml</span><br><span class="line"></span><br><span class="line">$ kubectl describe secrets `kubectl get secret -n kube-system | grep dashboard-admin | awk &apos;&#123;print $1&#125;&apos;` -n kube-system</span><br><span class="line"></span><br><span class="line">Name:         dashboard-admin-token-hrhfd</span><br><span class="line">Namespace:    kube-system</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubernetes.io/service-account.name: dashboard-admin</span><br><span class="line">              kubernetes.io/service-account.uid: 76805bdb-6047-11e9-ba0d-525400c322d9</span><br><span class="line"></span><br><span class="line">Type:  kubernetes.io/service-account-token</span><br><span class="line"></span><br><span class="line">Data</span><br><span class="line">====</span><br><span class="line">ca.crt:     1025 bytes</span><br><span class="line">namespace:  11 bytes</span><br><span class="line">token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkYXNoYm9hcmQtYWRtaW4tdG9rZW4taHJoZmQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGFzaGJvYXJkLWFkbWluIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiNzY4MDViZGItNjA0Ny0xMWU5LWJhMGQtNTI1NDAwYzMyMmQ5Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Omt1YmUtc3lzdGVtOmRhc2hib2FyZC1hZG1pbiJ9.hJJRyp_O4sGvIULj3BhqidCkkPnD4A2AtnpkXJoEPCALaaQHC8zhCA5-nDNlo2fiEggZ02UZPwiyGxKKFPC57UlKhjTf5zYcMIhELVXlj5FdBmjzCZcCHVFF4tj_rCoOFlZi6fQ3vNCcX8CtLxX_OsH1YXaFVuUmR1gYm97hbyuO382_k3tFIPXFP3QG8zUtc_7QMkeMNEakJZLCvkW8xdlaCuC-GVAMhZl5Kq1MSthuF-8HY7KaXhvqQzfD4DQZrdQ7vf_7NG3rdvhsj8nQ__TTe1W0RjqwkQuxg5YdE4gbAsxwJjkek-N0K9HfnZhkS9WosaUaUe9pZaGZ9akqyQ</span><br></pre></td></tr></table></figure>
+<p>token 是访问 dashboard 需要用的。</p>
+<p>若没有安装 kube-proxy，可以参考官方提供使用 <code>kubectl proxy</code> 的方式访问：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl proxy --address=IP --disable-filter=true</span><br></pre></td></tr></table></figure>
+<p>访问 <a href="http://IP:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login" target="_blank" rel="noopener">http://IP:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login</a></p>
+<p>已部署 kube-proxy 的可直接访问 <a href="https://IP:nodePort" target="_blank" rel="noopener">https://IP:nodePort</a> </p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1262158-5fefdb4cfa190543.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>选择令牌方式使用上面生成的 token 登录。</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1262158-4888de572ff9a0c9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>Dashboard 可以使用 Ingress、Let’s Encrypt 等多种方式配置 ssl，关于 ssl 的详细配置此处不进行详解。</p>
+<h3 id="二、部署-prometheus"><a href="#二、部署-prometheus" class="headerlink" title="二、部署 prometheus"></a>二、部署 prometheus</h3><p>prometheus 作为 CNCF 生态圈中的重要一员，其活跃度仅次于 Kubernetes, 现已广泛用于 Kubernetes 集群的监控系统中。prometheus 的部署相对比较简单，社区已经有了 <a href="https://github.com/coreos/kube-prometheus" target="_blank" rel="noopener">kube-prometheus</a>，kube-prometheus 会部署包含 prometheus-operator、grafana、kube-state-metrics 等多个组件。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git clone https://github.com/coreos/kube-prometheus</span><br><span class="line"></span><br><span class="line">$ kubectl apply -f manifests/</span><br></pre></td></tr></table></figure>
+<p>为了使用简单，我也会将 prometheus 和 grafana 的端口修改为 nodePort 的方式进行暴露：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl edit svc prometheus-k8s -n monitoring</span><br><span class="line"></span><br><span class="line">$ kubectl edit svc grafana -n monitoring</span><br><span class="line"></span><br><span class="line">$ kubectl get svc -n monitoring</span><br><span class="line">NAME                    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE</span><br><span class="line">alertmanager-main       NodePort    10.102.81.118   &lt;none&gt;        9093:8007/TCP       5d1h</span><br><span class="line">alertmanager-operated   ClusterIP   None            &lt;none&gt;        9093/TCP,6783/TCP   5d1h</span><br><span class="line">grafana                 NodePort    10.96.19.82     &lt;none&gt;        3000:8006/TCP       5d1h</span><br><span class="line">kube-state-metrics      ClusterIP   None            &lt;none&gt;        8443/TCP,9443/TCP   5d1h</span><br><span class="line">node-exporter           ClusterIP   None            &lt;none&gt;        9100/TCP            5d1h</span><br><span class="line">prometheus-adapter      ClusterIP   10.107.103.58   &lt;none&gt;        443/TCP             5d1h</span><br><span class="line">prometheus-k8s          NodePort    10.110.222.41   &lt;none&gt;        9090:8005/TCP       5d1h</span><br><span class="line">prometheus-operated     ClusterIP   None            &lt;none&gt;        9090/TCP            5d1h</span><br><span class="line">prometheus-operator     ClusterIP   None            &lt;none&gt;        8080/TCP            5d1h</span><br><span class="line"></span><br><span class="line">$ kubectl get pod -n monitoring</span><br><span class="line">NAME                                   READY   STATUS    RESTARTS   AGE</span><br><span class="line">alertmanager-main-0                    2/2     Running   0          4d</span><br><span class="line">alertmanager-main-1                    2/2     Running   0          4d</span><br><span class="line">alertmanager-main-2                    2/2     Running   0          4d</span><br><span class="line">grafana-9d97dfdc7-qfjts                1/1     Running   0          4d</span><br><span class="line">kube-state-metrics-74d7dcd7dc-qfz5m    4/4     Running   0          3d11h</span><br><span class="line">node-exporter-5cdl2                    2/2     Running   0          4d</span><br><span class="line">prometheus-adapter-b7d894c9c-dvzzq     1/1     Running   0          4d</span><br><span class="line">prometheus-k8s-0                       3/3     Running   1          2d2h</span><br><span class="line">prometheus-k8s-1                       3/3     Running   1          4d</span><br><span class="line">prometheus-operator-77b8b97459-7qfxj   1/1     Running   0          4d</span><br></pre></td></tr></table></figure>
+<p>上面几个组件成功运行后就可以在页面访问 prometheus 和 ganfana ：</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1262158-58e439a2407773ca.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>进入 grafana 的 web 端，默认用户名和密码均为 admin：</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1262158-b97f2279fadbd3a1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>grafana 支持导入其他的 Dashboard，在 grafana 官方网站可以搜到大量与 k8s 相关的 dashboard。 </p>
+<h3 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h3><p>本文介绍了对 kubernetes 和容器监控比较成熟的两个方案，虽然目前开源的方案比较多，但是要形成采集、存储、展示、报警一个完成的体系还需要在使用过程中不断探索与完善。</p>
 
       
     </div>
@@ -418,7 +428,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/metrics-server/" rel="tag"># metrics-server</a>
+            <a href="/tags/kube-dashboard/" rel="tag"># kube-dashboard</a>
+          
+            <a href="/tags/prometheus/" rel="tag"># prometheus</a>
           
         </div>
       
@@ -431,8 +443,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/03/13/k8s_leader_election/" rel="next" title="kubernets 中组件高可用的实现方式">
-                <i class="fa fa-chevron-left"></i> kubernets 中组件高可用的实现方式
+              <a href="/2019/04/14/k8s_metrics_server/" rel="next" title="kubernetes 指标采集组件 metrics-server 的部署">
+                <i class="fa fa-chevron-left"></i> kubernetes 指标采集组件 metrics-server 的部署
               </a>
             
           </div>
@@ -440,10 +452,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/04/22/k8s_dashboard_prometheus/" rel="prev" title="部署 kubernetes 可视化监控组件">
-                部署 kubernetes 可视化监控组件 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -574,7 +582,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#一、开启-API-Aggregation"><span class="nav-number">1.</span> <span class="nav-text">一、开启 API Aggregation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二、部署-metrics-server"><span class="nav-number">2.</span> <span class="nav-text">二、部署 metrics-server</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1、获取配置文件"><span class="nav-number">2.1.</span> <span class="nav-text">1、获取配置文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2、修改-metrics-server-配置参数"><span class="nav-number">2.2.</span> <span class="nav-text">2、修改 metrics-server 配置参数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3、部署"><span class="nav-number">2.3.</span> <span class="nav-text">3、部署</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三、metrics-server-的使用"><span class="nav-number">3.</span> <span class="nav-text">三、metrics-server 的使用</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、kubernetes-dashboard-的部署"><span class="nav-number">1.</span> <span class="nav-text">一、kubernetes-dashboard 的部署</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、创建-kubernetes-dashboard"><span class="nav-number">1.1.</span> <span class="nav-text">1、创建 kubernetes-dashboard</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2、使用-nodePort-方式访问-kubernetes-dashboard"><span class="nav-number">1.2.</span> <span class="nav-text">2、使用 nodePort 方式访问 kubernetes-dashboard</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3、创建-kubernetes-dashboard-管理员角色"><span class="nav-number">1.3.</span> <span class="nav-text">3、创建 kubernetes-dashboard 管理员角色</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、部署-prometheus"><span class="nav-number">2.</span> <span class="nav-text">二、部署 prometheus</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三、总结"><span class="nav-number">3.</span> <span class="nav-text">三、总结</span></a></li></ol></div>
             
 
           </div>
