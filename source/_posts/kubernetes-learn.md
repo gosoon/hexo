@@ -13,7 +13,7 @@ type: "kubernetes"
 [kubernetes](https://github.com/kubernetes/kubernetes) 是 google 的一个开源软件，其社区活跃量远超 **Mesos，Coreos** 的，若想深入学习建议参考**《kubernetes 权威指南》**，我们团队的人都是从这本书学起的，作为一个新技术，会踩到的坑非常多，以下提及的是我学习过程中整理的部分资料。
 
 
-![kubernetes 架构图](http://upload-images.jianshu.io/upload_images/1262158-e050e035d6fa64ed.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![kubernetes 架构图](http://cdn.tianfeiyu.com/bank.png)
 
 
 kubernetes 是一个分布式系统，所以它有多个组件，并且需要安装在多个节点，一般来说有三个节点，etcd，master 和 minion，但是每个节点却又有多台机器，etcd 作为高性能存储服务，一般独立为一个节点，当然容错是必不可少的，官方建议集群使用奇数个节点，我们的线下集群使用 3 个节点。etcd 的学习可以参考 **gitbook** 上面某大神的一本书 一 [etcd3学习笔记](https://skyao.gitbooks.io/leaning-etcd3/content/documentation/leaning/)。master 端需要安装 kube-apiserver、kube-controller-manager和kube-scheduler 组件，minion 节点需要部署 kubelet、kube-proxy、docker 组件。

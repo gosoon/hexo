@@ -12,7 +12,7 @@ type: "v1.12"
 
 k8s 中许多 resouce 都是随着 k8s 的版本变化而变化的，例如，statefulset 在 v1.8 版本中 apiVersion 是 apps/v1beta1，在 v1.12 中变为了 apps/v1。k8s 有接口可以获取到当前版本所有的 OpenAPI ：
 
-![image.png](https://upload-images.jianshu.io/upload_images/1262158-272c63b4eabe3cee.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![OpenAPI](http://cdn.tianfeiyu.com/openapi-1.png)
 
 参考文档：[The Kubernetes API](https://kubernetes.io/docs/concepts/overview/kubernetes-api/)
 
@@ -59,7 +59,7 @@ staticPodPath: /etc/kubernetes/manifests
 
 将 kubelet 配置文件中的 LOG_LEVEL 参数改为大于等于 5 可以看到 config.yaml 中配置的定义，以方便排查问题：
 
-![image.png](https://upload-images.jianshu.io/upload_images/1262158-8af5facac815e980.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![config](http://cdn.tianfeiyu.com/iterm-1.png)
 
 对应的日志输出：
 

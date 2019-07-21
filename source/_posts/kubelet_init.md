@@ -46,7 +46,7 @@ cmd/kubelet
 2 directories, 22 files
 ```
 
-![kubelet 启动流程时序图](https://upload-images.jianshu.io/upload_images/1262158-bdeb34a5cdda93d2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![kubelet 启动流程时序图](http://cdn.tianfeiyu.com/kubelet-3.png)
 
 #### 1、kubelet 入口函数 main（cmd/kubelet/kubelet.go）
 

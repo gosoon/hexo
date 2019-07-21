@@ -9,7 +9,7 @@ type: "kubelet"
  
 > kubernetes 版本： v1.12 
 
-![kubelet 工作原理](https://upload-images.jianshu.io/upload_images/1262158-78c8272f4b617c92.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![kubelet 工作原理](http://cdn.tianfeiyu.com/kubelet-1.png)
 
 kubelet 的工作核心就是在围绕着不同的生产者生产出来的不同的有关 pod 的消息来调用相应的消费者（不同的子模块）完成不同的行为(创建和删除 pod 等)，即图中的控制循环（SyncLoop），通过不同的事件驱动这个控制循环运行。
 
@@ -18,7 +18,7 @@ kubelet 的工作核心就是在围绕着不同的生产者生产出来的不同
 
 ## kubelet 创建 pod 的流程
 
-![kubelet 创建 pod 的流程](https://upload-images.jianshu.io/upload_images/1262158-bb6b29bac1ca6c9d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![kubelet 创建 pod 的流程](http://cdn.tianfeiyu.com/kubelet-2.png)
 
 
 ### 1、kubelet 的控制循环（syncLoop）

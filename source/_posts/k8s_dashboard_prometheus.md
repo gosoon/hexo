@@ -110,11 +110,11 @@ $ kubectl proxy --address=IP --disable-filter=true
 
 已部署 kube-proxy 的可直接访问 https://IP:nodePort 
 
-![](https://upload-images.jianshu.io/upload_images/1262158-5fefdb4cfa190543.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![](http://cdn.tianfeiyu.com/dash-1.png)
 
 选择令牌方式使用上面生成的 token 登录。
 
-![](https://upload-images.jianshu.io/upload_images/1262158-4888de572ff9a0c9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![](http://cdn.tianfeiyu.com/dash-2.png)
 
 Dashboard 可以使用 Ingress、Let's Encrypt 等多种方式配置 ssl，关于 ssl 的详细配置此处不进行详解。
 
@@ -164,11 +164,11 @@ prometheus-operator-77b8b97459-7qfxj   1/1     Running   0          4d
 
 上面几个组件成功运行后就可以在页面访问 prometheus 和 ganfana ：
 
-![](https://upload-images.jianshu.io/upload_images/1262158-58e439a2407773ca.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![](http://cdn.tianfeiyu.com/dash-3.png)
 
 进入 grafana 的 web 端，默认用户名和密码均为 admin：
 
-![](https://upload-images.jianshu.io/upload_images/1262158-b97f2279fadbd3a1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![](http://cdn.tianfeiyu.com/dash-4.png)
 
 grafana 支持导入其他的 Dashboard，在 grafana 官方网站可以搜到大量与 k8s 相关的 dashboard。 
 

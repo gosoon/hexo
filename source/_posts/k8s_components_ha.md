@@ -61,7 +61,7 @@ etcd 是一个分布式集群，也是一个有状态的服务，其天生就是
 
  **kubernetes 中组件高可用部署的一个架构图**：
 
-![image-20190712163334068](http://cdn.tianfeiyu.com/image-1.png)
+![kubernetes 组件高可用部署](http://cdn.tianfeiyu.com/image-1.png)
 
 
 #### 总结

@@ -9,22 +9,22 @@ kubectl  的所有操作都是调用 kube-apisever 的 API 实现的，所以其
  `$ kubectl get node -v=9` 
 
 以下为 kubernetes 开发中常用的 API：
-![deployment 常用 API](https://upload-images.jianshu.io/upload_images/1262158-6fdb3babc9522929.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![deployment 常用 API](http://cdn.tianfeiyu.com/deploy-1.png)
 
-![statefulset 常用 API](https://upload-images.jianshu.io/upload_images/1262158-2562e12aaa019909.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![statefulset 常用 API](http://cdn.tianfeiyu.com/sts-1.png)
 
-![pod 常用 API](https://upload-images.jianshu.io/upload_images/1262158-d74728f38ba4361e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![pod 常用 API](http://cdn.tianfeiyu.com/pod-1.png)
 
 
-![service 常用 API](https://upload-images.jianshu.io/upload_images/1262158-225076f08495b6d4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![service 常用 API](http://cdn.tianfeiyu.com/service-1.png)
 
-![endpoints 常用 API](https://upload-images.jianshu.io/upload_images/1262158-71c815ad4fc45a65.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![endpoints 常用 API](http://cdn.tianfeiyu.com/endpoints-1.png)
 
-![namespace 常用 API](https://upload-images.jianshu.io/upload_images/1262158-f79e0c4bb215bb40.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![namespace 常用 API](http://cdn.tianfeiyu.com/namespace-1.png)
 
-![node 常用 API](https://upload-images.jianshu.io/upload_images/1262158-e67546fabc697d13.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![node 常用 API](http://cdn.tianfeiyu.com/nodes-1.png)
 
-![pv 常用 API](https://upload-images.jianshu.io/upload_images/1262158-a0eca87df2960565.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![pv 常用 API](http://cdn.tianfeiyu.com/pv-1.png)
 
  Markdown 表格显示过大，此仅以图片格式展示。
 
