@@ -61,7 +61,7 @@ Informer 的主要功能：
 ##### 1、Informer 中几个组件的作用
 Informer 中主要有 Reflector、Delta FIFO Queue、Local Store、WorkQueue 几个组件。以下是 Informer 的工作流程图。
 
-![Informer 组件](https://upload-images.jianshu.io/upload_images/1262158-1fd8ae6c9e00e92b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![Informer 组件](http://cdn.tianfeiyu.com/informer-1.png)
 
 
 
@@ -330,7 +330,7 @@ func NewController(
 
 `k8s.io/kubernetes/pkg/controller/statefulset/stateful_set.go`
 
-![kube-controller-manager sts controller](https://upload-images.jianshu.io/upload_images/1262158-4f2f879989eef369.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![kube-controller-manager sts controller](http://cdn.tianfeiyu.com/informer-2.png)
 
 
 

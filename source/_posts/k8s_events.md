@@ -47,7 +47,7 @@ type Event struct {
 
 k8s 中 events 目前只有两种类型："Normal" 和 "Warning"：
 
-![events 的两种类型](https://upload-images.jianshu.io/upload_images/1262158-c42d7442b2bc38d1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![events 的两种类型](http://cdn.tianfeiyu.com/events.png)
 
 
 ##### 2、EventBroadcaster 的初始化

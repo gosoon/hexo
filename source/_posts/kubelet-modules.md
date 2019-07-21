@@ -56,7 +56,7 @@ LISTEN     0      128    127.0.0.1:10248                    *:*                 
 
 ## 三、kubelet 组件中的模块
 
- ![kubelet 组件中的模块](https://upload-images.jianshu.io/upload_images/1262158-91b13623d3cf45ec.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+ ![kubelet 组件中的模块](http://cdn.tianfeiyu.com/kubelet-4.png)
 
 上图展示了 kubelet 组件中的模块以及模块间的划分。
 

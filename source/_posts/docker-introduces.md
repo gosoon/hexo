@@ -17,10 +17,10 @@ type: "docker"
 
 ## 二、Docker 架构
 
-![docker 架构](https://upload-images.jianshu.io/upload_images/1262158-eee83eb356fccdb8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![docker 架构](http://cdn.tianfeiyu.com/docker-1.png)
 
 
-![docker 进程关系](https://upload-images.jianshu.io/upload_images/1262158-3f74443f956fa132.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![docker 进程关系](http://cdn.tianfeiyu.com/docker-2.png)
 
 
 ### 三、核心概念

@@ -88,8 +88,8 @@ func Run(c *config.CompletedConfig, stopCh <-chan struct{}) error {
         panic("unreachable")
     }
 
-	// 如果 LeaderElect 参数配置为 true,说明 controller-manager 是以 HA 方式启动的，
-	// 则执行下面的代码进行 leader 选举，选举出的 leader 会回调 run 方法。
+    // 如果 LeaderElect 参数配置为 true,说明 controller-manager 是以 HA 方式启动的，
+    // 则执行下面的代码进行 leader 选举，选举出的 leader 会回调 run 方法。
     id, err := os.Hostname()
     if err != nil {
         return err
@@ -131,7 +131,7 @@ func Run(c *config.CompletedConfig, stopCh <-chan struct{}) error {
 
 - 1、初始化资源锁，kubernetes 中默认的资源锁使用 `endpoints`，也就是 c.ComponentConfig.Generic.LeaderElection.ResourceLock 的值为 "endpoints"，在代码中我并没有找到对 ResourceLock 初始化的地方，只看到了对该参数的说明以及日志中配置的默认值：
 
-![](https://upload-images.jianshu.io/upload_images/1262158-402b3215eb022307.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![](http://cdn.tianfeiyu.com/leader-1.png)
 
 ​在初始化资源锁的时候还传入了 EventRecorder，其作用是当 leader 发生变化的时候会将对应的 events 发送到 apiserver。
 
@@ -297,9 +297,9 @@ func (le *LeaderElector) tryAcquireOrRenew() bool {
 		leaderElectionRecord.LeaderTransitions = oldLeaderElectionRecord.LeaderTransitions + 1
 	}
 
-	// 更新资源
-    // 对于 Leader 来说，这是一个续租的过程
-    // 对于非 Leader 节点（仅在上一个资源锁已经过期），这是一个更新锁所有权的过程
+        // 更新资源
+        // 对于 Leader 来说，这是一个续租的过程
+        // 对于非 Leader 节点（仅在上一个资源锁已经过期），这是一个更新锁所有权的过程
 	if err = le.config.Lock.Update(leaderElectionRecord); err != nil {
 		glog.Errorf("Failed to update lock: %v", err)
 		return false
@@ -326,8 +326,8 @@ func (le *LeaderElector) renew(ctx context.Context) {
 	wait.Until(func() {
 		timeoutCtx, timeoutCancel := context.WithTimeout(ctx, le.config.RenewDeadline)
 		defer timeoutCancel()
-		// 每间隔 RetryPeriod 就执行 tryAcquireOrRenew()
-        // 如果 tryAcquireOrRenew() 返回 false 说明续租失败
+                // 每间隔 RetryPeriod 就执行 tryAcquireOrRenew()
+                // 如果 tryAcquireOrRenew() 返回 false 说明续租失败
 		err := wait.PollImmediateUntil(le.config.RetryPeriod, func() (bool, error) {
 			done := make(chan bool, 1)
 			go func() {
@@ -481,7 +481,7 @@ Events:
 
 本文讲述了 kube-controller-manager 使用 HA 的方式启动后 leader 选举过程的实现说明，k8s 中通过创建 endpoints 资源以及对该资源的持续更新来实现资源锁轮转的过程。但是相对于其他分布式锁的实现，普遍是直接基于现有的中间件实现，比如 redis、zookeeper、etcd 等，其所有对锁的操作都是原子性的，那 k8s 选举过程中的原子操作是如何实现的？k8s 中的原子操作最终也是通过 etcd 实现的，其在做 update 更新锁的操作时采用的是乐观锁，通过对比 resourceVersion 实现的，详细的实现下节再讲。
 
-![api resource](https://upload-images.jianshu.io/upload_images/1262158-7ec427b37b6b6a10.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![api resource](http://cdn.tianfeiyu.com/api-resource-1.png)
 
 
 
