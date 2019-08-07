@@ -11,7 +11,7 @@ kubernetes 项目中有相当一部分代码是自动生成的，主要是 API �
 
 ### 要生成哪些代码
 
-在自定义 controller 时需要用到 typed clientsets，informers，listers 和 deep-copy 等函数，这些函数都可以使用 [code-generator](https://github.com/kubernetes/code-generator/) 来生成，具体的作用可以参考：[kubernetes 中 informer 的使用]([http://blog.tianfeiyu.com/2019/05/17/client-go_informer/](http://blog.tianfeiyu.com/2019/05/17/client-go_informer/))。
+在自定义 controller 时需要用到 typed clientsets，informers，listers 和 deep-copy 等函数，这些函数都可以使用 [code-generator](https://github.com/kubernetes/code-generator/) 来生成，具体的作用可以参考：[kubernetes 中 informer 的使用]([http://blog.tianfeiyu.com/2019/05/17/client-go_informer/](http://blog.tianfeiyu.com/2019/05/17/client-go_informer/)。
 
 code-generator 里面包含多个生成代码的工具，下面是需要用到的几个：
 
@@ -288,7 +288,7 @@ generate-groups.sh 需要四个参数：
 
 
 
-CRD 以及生成的代码见：[kubernetes-operator](https://github.com/gosoon/kubernetes-operator)
+CRD 以及生成的代码见：[kubernetes-operator](https://github.com/gosoon/kubernetes-operator)。
 
 
 
