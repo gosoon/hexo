@@ -1,7 +1,7 @@
 ---
 title: kube-on-kube-operator 开发(一)
 date: 2019-08-05 16:37:30
-tags: ["operator",]
+tags: ["operator","kube-on-kube"]
 type: "kubernetes-operator"
 
 ---
@@ -12,7 +12,7 @@ kubernetes 已经成为容器时代的分布式操作系统内核，目前也是
 
 ### kubernetes-operator 设计参考
 
-记得 kube-on-kube-operator 的概念最初是在去年的 kubeCon 上蚂蚁金服提出来的，先看看蚂蚁金服以及腾讯云 kube-on-kube-operator 的设计思路，其实腾讯云的架构和蚂蚁金服的是类似的。以下是蚂蚁金服的架构设计图：
+记得 kube-on-kube-operator 的概念最初是在去年的 kubeCon China 上蚂蚁金服提出来的，先看看蚂蚁金服以及腾讯云 kube-on-kube-operator 的设计思路，其实腾讯云的架构和蚂蚁金服的是类似的。以下是蚂蚁金服的架构设计图：
 
 ![](http://cdn.tianfeiyu.com/image-20190805163304515.png)
 
