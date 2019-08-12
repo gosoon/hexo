@@ -30,9 +30,17 @@ kubernetes 已经成为容器时代的分布式操作系统内核，目前也是
 
 > kubernetes-operator 项目地址：[https://github.com/gosoon/kubernetes-operator](https://github.com/gosoon/kubernetes-operator)
 
+目前该项目的主要目标是实现以下三种场景中的集群管理：
+
+- kube-on-kube
+- kube-to-kube
+- kube-to-cloud-kube
+
+kubernetes-operator 不仅是要实现 kube-on-kube 架构，还有 kube-to-kube，kube-to-cloud-kube，kube-to-kube 即 kubernetes 集群管理业务独立的 kubernetes 集群，两个集群相互独立。kube-to-cloud-kube 即 kubernetes 集群管理多云环境上的 kubernetes 集群。
 
 
-这是项目的架构图，红色的线段表示对集群生命周期管理的一个操作，涉及集群的创建、删除、扩缩容、升级等，蓝色线段是对集群应用的操作，集群中应用的创建、删除、发布更新等，kubernetes-proxy 是一个 API 代理，所有涉及 API 的调用都要通过 kubernetes-proxy。左边部署有 kubernetes-operator 的是元集群，kubernetes-operator 使用 etcd 仅存储部分配置信息，其管理业务集群的生命周期，支持三种集群的创建方式，第一种方式就是可以创建出类似蚂蚁金服这种直接将业务集群 master 运行在元集群，node 节点在业务集群，第二种是以二进制方式创建业务集群，其中业务集群的 master 以及 node 都是在业务集群所在的机房，第三种方式就是在各种公有云厂商创建集群，以一种统一的方式管理公有云上的集群，也可以称作融合云。
+
+上面是项目的架构图，红色的线段表示对集群生命周期管理的一个操作，涉及集群的创建、删除、扩缩容、升级等，蓝色线段是对集群应用的操作，集群中应用的创建、删除、发布更新等，kubernetes-proxy 是一个 API 代理，所有涉及 API 的调用都要通过 kubernetes-proxy。左边部署有 kubernetes-operator 的是元集群，kubernetes-operator 使用 etcd 仅存储部分配置信息，其管理业务集群的生命周期，支持三种集群的创建方式，第一种方式就是可以创建出类似蚂蚁金服这种直接将业务集群 master 运行在元集群，node 节点在业务集群，第二种是以二进制方式创建业务集群，其中业务集群的 master 以及 node 都是在业务集群所在的机房，第三种方式就是在各种公有云厂商创建集群，以一种统一的方式管理公有云上的集群，也可以称作融合云。
 
 
 
@@ -67,7 +75,7 @@ kubebuilder, operator-sdk 都是对controller-runtime做了封装, controller ru
 
 
 
-目前比较成熟的用于生产环境的 kubernetes 集群部署工具有：kubeadm、kubespary、kops、rancher、kubeasz 等。kubeadm、kubespary、kops 都是官方开源的产品，kubeadm 使用容器化的方式部署，需要手动执行一些部署命令，暂时无法完全自动化部署。kubespary 是对 kubeadm 的一层封装，使用 ansible + kubeadm 的方式自动化进行部署，据说阿里云就是使用 kubespary 部署集群的。在共有云的环境(GCP、AWS)通常使用 kops  部署起来更方便些。kubeasz 是使用 ansible 自动化的方式部署二进制集群，目前也已经比较成熟了。
+目前比较成熟的用于生产环境的 kubernetes 集群部署工具有：kubeadm、kubespary、kops、rancher、kubeasz 等。kubeadm、kubespary、kops 都是官方开源的产品，kubeadm 使用容器化的方式部署，需要手动执行一些部署命令，暂时无法完全自动化部署。kubespary 是对 kubeadm 的一层封装，使用 ansible + kubeadm 的方式自动化进行部署，据说阿里云就是使用 kubespary 部署集群的。在公有云的环境(GCP、AWS)通常使用 kops  部署起来更方便些。kubeasz 是使用 ansible 自动化的方式部署二进制集群，目前也已经比较成熟了。
 
 
 
