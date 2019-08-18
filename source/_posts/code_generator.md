@@ -217,7 +217,7 @@ EOF
 执行命令生成代码：
 
 ```
-$ $GOPATH/src/k8s.io/code-generator/generate-groups.sh all github.com/gosoon/test/pkg/client github.com/gosoon/test/pkg/apis ecs:v1
+$ $GOPATH/src/k8s.io/code-generator/generate-groups.sh all github.com/gosoon/kubernetes-operator/pkg/client github.com/gosoon/kubernetes-operator/pkg/apis ecs:v1
 ```
 
 
