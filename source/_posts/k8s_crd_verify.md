@@ -95,7 +95,7 @@ spec:
     openAPIV3Schema:
       properties:
         spec:
-		      type: object
+	  type: object
           required:
           - clusterType
           - masterList
