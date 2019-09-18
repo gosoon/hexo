@@ -3,7 +3,7 @@ title: About
 date: 2018-12-08 16:46:18
 ---
 
-###  专注容器生态圈，喜欢钻研 Kubernetes、Docker、Istio 等技术
+###  专注 k8s 云原生实践
 <br/>
 
 github: [https://github.com/gosoon](https://github.com/gosoon)
