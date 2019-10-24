@@ -64,7 +64,7 @@ func defaultPredicates() sets.String {
 
 默认的 predicates 调度算法主要分为五种类型：
 
-1、第一种类型叫作 GeneralPredicates，包含 PodFitsResources、PodFitsHost、PodFitsHostPorts、PodMatchNodeSelector 四中策略，其具体含义如下所示：
+1、第一种类型叫作 GeneralPredicates，包含 PodFitsResources、PodFitsHost、PodFitsHostPorts、PodMatchNodeSelector 四种策略，其具体含义如下所示：
 
 - PodFitsHost：检查宿主机的名字是否跟 Pod 的 spec.nodeName 一致
 - PodFitsHostPorts：检查 Pod 申请的宿主机端口（spec.nodePort）是不是跟已经被使用的端口有冲突
@@ -238,14 +238,15 @@ pridicates 调度算法的核心是 `podFitsOnNode()` ，scheduler 的抢占机�
 - 如果该 node 上存在 nominated pod 则执行两次预选函数
 
 
+因为引入了抢占机制，此处主要说明一下执行两次预选函数的原因：
 
-因为引入了抢占机制，该函数的设计比较复杂，此处主要说明一下执行两次预选函数的原因：
+第一次循环，若该 pod 为抢占者(`nominatedPods`)，调度器会假设该 pod 已经运行在这个节点上，然后更新`meta`和`nodeInfo`，`nominatedPods`是指执行了抢占机制且已经分配到了 node(`pod.Status.NominatedNodeName` 已被设定) 但是还没有真正运行起来的 pod，然后再执行所有的预选函数。
 
-第一次循环，将所有的优先级比较高或者相等的`nominatedPods`加入到 node 中，更新`meta`和`nodeInfo`，预选函数会用到 `meta`和`nodeInfo`，`nominatedPods`是指执行了抢占机制且已经分配到了 node(`pod.Status.NominatedNodeName` 已被设定) 但是还没有真正运行起来的 pod，然后再执行所有的预选函数，这样做可以保证优先级高的 pod 不会因为现在的 pod 的加入而导致调度失败。
+第二次循环，不将`nominatedPods`加入到 node 内。
 
-第二次循环，不将`nominatedPods`加入到 node 内，这样做是因为考虑到 pod affinity 等策略的执行，如果当前的 pod 与`nominatedPods`有依赖关系就会有问题，因为`nominatedPods`不能保证一定可以调度且在已指定的 node 运行成功，也可能出现被其他高优先级的 pod 抢占等问题，关于抢占问题下篇会详细介绍。
+而只有这两遍 predicates 算法都能通过时，这个 pod 和 node 才会被认为是可以绑定(bind)的。这样做是因为考虑到 pod affinity 等策略的执行，如果当前的 pod 与`nominatedPods`有依赖关系就会有问题，因为`nominatedPods`不能保证一定可以调度且在已指定的 node 运行成功，也可能出现被其他高优先级的 pod 抢占等问题，关于抢占问题下篇会详细介绍。
 
-
+`k8s.io/kubernetes/pkg/scheduler/core/generic_scheduler.go:610`
 ```
 func (g *genericScheduler) podFitsOnNode(......) (bool, []predicates.PredicateFailureReason, *framework.Status, error) {
     var failedPredicates []predicates.PredicateFailureReason
