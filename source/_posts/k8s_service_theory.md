@@ -172,7 +172,7 @@ Ingress 的结构如下图所示:
 
 
 
-### Service 的使用
+### service 的使用
 
 
 ##### ClusterIP 方式
