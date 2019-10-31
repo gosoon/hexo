@@ -83,7 +83,7 @@
 <meta name="keywords" content="Authentication,Authorization,RBAC">
 <meta property="og:type" content="article">
 <meta property="og:title" content="浅析 kubernetes 的认证与鉴权机制">
-<meta property="og:url" content="http://yoursite.com/2019/08/18/k8s_auth_rbac/index.html">
+<meta property="og:url" content="http://blog.tianfeiyu.com/2019/08/18/k8s_auth_rbac/index.html">
 <meta property="og:site_name" content="田飞雨">
 <meta property="og:description" content="笔者最初接触 kubernetes 时使用的是 v1.4 版本，集群间的通信仅使用 8080 端口，认证与鉴权机制还未得到完善，到后来开始使用 static token 作为认证机制，直到 v1.6 时才开始使用 TLS 认证。随着社区的发展，kubernetes 的认证与鉴权机制已经越来越完善，新版本已经全面趋于 TLS + RBAC 配置，但其认证与鉴权机制也极其复杂，本文将会带你一步步了解。">
 <meta property="og:locale" content="zh-Hans">
@@ -124,7 +124,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/08/18/k8s_auth_rbac/">
+  <link rel="canonical" href="http://blog.tianfeiyu.com/2019/08/18/k8s_auth_rbac/">
 
 
 
@@ -299,7 +299,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/18/k8s_auth_rbac/">
+    <link itemprop="mainEntityOfPage" href="http://blog.tianfeiyu.com/2019/08/18/k8s_auth_rbac/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="tianfeiyu">
@@ -433,7 +433,7 @@
 <p>准入控制是在 apiserver 中进行配置的：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">KUBE_ADMISSION_CONTROL=&quot;--enable-admission-plugins=NamespaceLifecycle,LimitRanger,...MutatingAdmissionWebhook,ValidatingAdmissionWebhook,NodeRestriction...&quot;</span><br></pre></td></tr></table></figure>
 <p>准入控制的配置是有序的，不同的顺序会影响 kubernetes 的性能，建议使用官方的配置。</p>
-<p>若需要对 kubernetes 中的对象做一些扩展，可以使用准入控制，比如：创建 pod 时添加 initContainer 或者校验字段等。准入控制最常使用的扩展方式就是 <a href="https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#what-are-admission-webhooks" target="_blank" rel="noopener">admission webhooks</a>，以前写过一篇类似的文章，可以参考：<a href="http://blog.tianfeiyu.com/2019/07/02/k8s_crd_verify/" target="_blank" rel="noopener">http://blog.tianfeiyu.com/2019/07/02/k8s_crd_verify/</a>。</p>
+<p>若需要对 kubernetes 中的对象做一些扩展，可以使用准入控制，比如：创建 pod 时添加 initContainer 或者校验字段等。准入控制最常使用的扩展方式就是 <a href="https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#what-are-admission-webhooks" target="_blank" rel="noopener">admission webhooks</a>，以前写过一篇类似的文章，可以参考：<a href="http://blog.tianfeiyu.com/2019/07/02/k8s_crd_verify/">http://blog.tianfeiyu.com/2019/07/02/k8s_crd_verify/</a>。</p>
 <blockquote>
 <p> 准入控制更详细的文档，请参考：<a href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/" target="_blank" rel="noopener">https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/</a></p>
 </blockquote>
@@ -598,7 +598,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">35</span>
+                  <span class="site-state-item-count">36</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -611,7 +611,7 @@
               
               <div class="site-state-item site-state-tags">
                 
-                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-count">39</span>
                   <span class="site-state-item-name">标签</span>
                 
               </div>

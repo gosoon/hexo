@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="crd,admission control,">
+  <meta name="keywords" content="kubernetes service,">
 
 
 
@@ -79,20 +79,26 @@
 
 
 
-<meta name="description" content="在以前的版本若要对 apiserver 的请求做一些访问控制，必须修改 apiserver 的源代码然后重新编译部署，非常麻烦也不灵活，apiserver 也支持一些动态的准入控制器，在 apiserver 配置中看到的ServiceAccount,NamespaceLifecycle,NamespaceExists,LimitRanger,ResourceQuota 等都是 apiserver">
-<meta name="keywords" content="crd,admission control">
+<meta name="description" content="为什么需要 service在 kubernetes  中，当创建带有多个副本的 deployment 时，kubernetes 会创建出多个 pod，此时即一个服务后端有多个容器，那么在 kubernetes  中负载均衡怎么做，容器漂移后 ip 也会发生变化，如何做服务发现以及会话保持？这就是 service 的作用，service 是一组具有相同 label pod 集合的抽象，集群内外的各个">
+<meta name="keywords" content="kubernetes service">
 <meta property="og:type" content="article">
-<meta property="og:title" content="kubernetes 自定义资源（CRD）的校验">
-<meta property="og:url" content="http://blog.tianfeiyu.com/2019/07/02/k8s_crd_verify/index.html">
+<meta property="og:title" content="kubernetes service 原理解析">
+<meta property="og:url" content="http://blog.tianfeiyu.com/2019/10/31/k8s_service_theory/index.html">
 <meta property="og:site_name" content="田飞雨">
-<meta property="og:description" content="在以前的版本若要对 apiserver 的请求做一些访问控制，必须修改 apiserver 的源代码然后重新编译部署，非常麻烦也不灵活，apiserver 也支持一些动态的准入控制器，在 apiserver 配置中看到的ServiceAccount,NamespaceLifecycle,NamespaceExists,LimitRanger,ResourceQuota 等都是 apiserver">
+<meta property="og:description" content="为什么需要 service在 kubernetes  中，当创建带有多个副本的 deployment 时，kubernetes 会创建出多个 pod，此时即一个服务后端有多个容器，那么在 kubernetes  中负载均衡怎么做，容器漂移后 ip 也会发生变化，如何做服务发现以及会话保持？这就是 service 的作用，service 是一组具有相同 label pod 集合的抽象，集群内外的各个">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://cdn.tianfeiyu.com/1562032999173.jpg">
-<meta property="og:updated_time" content="2019-09-18T05:53:44.408Z">
+<meta property="og:image" content="http://cdn.tianfeiyu.com/service%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86.png">
+<meta property="og:image" content="http://cdn.tianfeiyu.com/services-userspace-overview.svg">
+<meta property="og:image" content="http://cdn.tianfeiyu.com/services-iptables-overview.svg">
+<meta property="og:image" content="http://cdn.tianfeiyu.com/clusterIP.png">
+<meta property="og:image" content="http://cdn.tianfeiyu.com/nodeport.png">
+<meta property="og:image" content="http://cdn.tianfeiyu.com/loadbalancer.png">
+<meta property="og:image" content="http://cdn.tianfeiyu.com/ingress.png">
+<meta property="og:updated_time" content="2019-10-31T02:48:54.067Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="kubernetes 自定义资源（CRD）的校验">
-<meta name="twitter:description" content="在以前的版本若要对 apiserver 的请求做一些访问控制，必须修改 apiserver 的源代码然后重新编译部署，非常麻烦也不灵活，apiserver 也支持一些动态的准入控制器，在 apiserver 配置中看到的ServiceAccount,NamespaceLifecycle,NamespaceExists,LimitRanger,ResourceQuota 等都是 apiserver">
-<meta name="twitter:image" content="http://cdn.tianfeiyu.com/1562032999173.jpg">
+<meta name="twitter:title" content="kubernetes service 原理解析">
+<meta name="twitter:description" content="为什么需要 service在 kubernetes  中，当创建带有多个副本的 deployment 时，kubernetes 会创建出多个 pod，此时即一个服务后端有多个容器，那么在 kubernetes  中负载均衡怎么做，容器漂移后 ip 也会发生变化，如何做服务发现以及会话保持？这就是 service 的作用，service 是一组具有相同 label pod 集合的抽象，集群内外的各个">
+<meta name="twitter:image" content="http://cdn.tianfeiyu.com/service%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86.png">
 
 
 
@@ -122,13 +128,13 @@
 
 
 
-  <link rel="canonical" href="http://blog.tianfeiyu.com/2019/07/02/k8s_crd_verify/">
+  <link rel="canonical" href="http://blog.tianfeiyu.com/2019/10/31/k8s_service_theory/">
 
 
 
 
 
-  <title>kubernetes 自定义资源（CRD）的校验 | 田飞雨</title>
+  <title>kubernetes service 原理解析 | 田飞雨</title>
   
 
 
@@ -292,12 +298,12 @@
   
   
 
-  <article class="post post-type-crd" itemscope="" itemtype="http://schema.org/Article">
+  <article class="post post-type-kubernetes service" itemscope="" itemtype="http://schema.org/Article">
   
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.tianfeiyu.com/2019/07/02/k8s_crd_verify/">
+    <link itemprop="mainEntityOfPage" href="http://blog.tianfeiyu.com/2019/10/31/k8s_service_theory/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="tianfeiyu">
@@ -314,7 +320,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">kubernetes 自定义资源（CRD）的校验</h1>
+          <h1 class="post-title" itemprop="name headline">kubernetes service 原理解析</h1>
         
 
         <div class="post-meta">
@@ -326,8 +332,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-02T11:00:00+08:00">
-                2019-07-02
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-31T10:30:30+08:00">
+                2019-10-31
               </time>
             
 
@@ -345,8 +351,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/07/02/k8s_crd_verify/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2019/07/02/k8s_crd_verify/" itemprop="commentCount"></span>
+                <a href="/2019/10/31/k8s_service_theory/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/10/31/k8s_service_theory/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -374,50 +380,68 @@
       
 
       
-        <p>在以前的版本若要对 apiserver 的请求做一些访问控制，必须修改 apiserver 的源代码然后重新编译部署，非常麻烦也不灵活，apiserver 也支持一些动态的准入控制器，在 apiserver 配置中看到的<code>ServiceAccount,NamespaceLifecycle,NamespaceExists,LimitRanger,ResourceQuota</code> 等都是 apiserver 的准入控制器，但这些都是 kubernetes 中默认内置的。在 v1.9 中，kubernetes 的动态准入控制器功能中支持了  Admission Webhooks，即用户可以以插件的方式对 apiserver 的请求做一些访问控制，要使用该功能需要自己写一个 admission webhook，apiserver 会在请求通过认证和授权之后、对象被持久化之前拦截该请求，然后调用 webhook 已达到准入控制，比如 Istio 中 sidecar 的注入就是通过这种方式实现的，在创建 Pod 阶段 apiserver 会回调 webhook 然后将 Sidecar 代理注入至用户 Pod。 本文主要介绍如何使用 AdmissionWebhook 对 CR 的校验，一般在开发 operator 过程中，都是通过对 CR 的操作实现某个功能的，若 CR 不规范可能会导致某些问题，所以对提交 CR 的校验是不可避免的一个步骤。</p>
-<p>kubernetes 目前提供了两种方式来对 CR 的校验，语法校验(<code>OpenAPI v3 schema</code>） 和语义校验<br>(<code>validatingadmissionwebhook</code>）。</p>
-<p>CRD 的一个示例：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: apiextensions.k8s.io/v1beta1</span><br><span class="line">kind: CustomResourceDefinition</span><br><span class="line">metadata:</span><br><span class="line">  # name must match the spec fields below, and be in the form: &lt;plural&gt;.&lt;group&gt;</span><br><span class="line">  name: kubernetesclusters.ecs.yun.com</span><br><span class="line">spec:</span><br><span class="line">  # group name to use for REST API: /apis/&lt;group&gt;/&lt;version&gt;</span><br><span class="line">  group: ecs.yun.com</span><br><span class="line">  # list of versions supported by this CustomResourceDefinition</span><br><span class="line">  versions:</span><br><span class="line">    - name: v1</span><br><span class="line">      # Each version can be enabled/disabled by Served flag.</span><br><span class="line">      served: true</span><br><span class="line">      # One and only one version must be marked as the storage version.</span><br><span class="line">      storage: true</span><br><span class="line">  # either Namespaced or Cluster</span><br><span class="line">  scope: Namespaced</span><br><span class="line">  names:</span><br><span class="line">    # plural name to be used in the URL: /apis/&lt;group&gt;/&lt;version&gt;/&lt;plural&gt;</span><br><span class="line">    plural: kubernetesclusters</span><br><span class="line">    # singular name to be used as an alias on the CLI and for display</span><br><span class="line">    singular: kubernetescluster</span><br><span class="line">    # kind is normally the CamelCased singular type. Your resource manifests use this.</span><br><span class="line">    kind: KubernetesCluster</span><br><span class="line">	  # listKind</span><br><span class="line">    listKind: KubernetesClusterList</span><br><span class="line">    # shortNames allow shorter string to match your resource on the CLI</span><br><span class="line">    shortNames:</span><br><span class="line">    - ecs</span><br></pre></td></tr></table></figure>
-<p>CRD 的一个对象：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: ecs.yun.com/v1</span><br><span class="line">kind: KubernetesCluster</span><br><span class="line">metadata:</span><br><span class="line">  name: test-cluster</span><br><span class="line">spec:</span><br><span class="line">  clusterType: kubernetes</span><br><span class="line">  serviceCIDR: &apos;&apos;</span><br><span class="line">  masterList:</span><br><span class="line">  - ip: 192.168.1.10</span><br><span class="line">  nodeList:</span><br><span class="line">  - ip: 192.168.1.11</span><br><span class="line">  privateSSHKey: &apos;&apos;</span><br><span class="line">  scaleUp: 0</span><br><span class="line">  scaleDown: 0</span><br></pre></td></tr></table></figure>
-<h4 id="一、OpenAPI-v3-schema"><a href="#一、OpenAPI-v3-schema" class="headerlink" title="一、OpenAPI v3 schema"></a>一、OpenAPI v3 schema</h4><p><a href="https://github.com/OAI/OpenAPI-Specification" target="_blank" rel="noopener">OpenAPI</a> 是针对 REST API 的 API 描述格式，也是一种规范。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: apiextensions.k8s.io/v1beta1</span><br><span class="line">kind: CustomResourceDefinition</span><br><span class="line">metadata:</span><br><span class="line">  name: kubernetesclusters.ecs.yun.com</span><br><span class="line">spec:</span><br><span class="line">  group: ecs.yun.com</span><br><span class="line">  versions:</span><br><span class="line">    - name: v1</span><br><span class="line">      served: true</span><br><span class="line">      storage: true</span><br><span class="line">  scope: Namespaced</span><br><span class="line">  names:</span><br><span class="line">    plural: kubernetesclusters</span><br><span class="line">    singular: kubernetescluster</span><br><span class="line">    kind: KubernetesCluster</span><br><span class="line">    listKind: KubernetesClusterList</span><br><span class="line">    shortNames:</span><br><span class="line">    - ecs</span><br><span class="line">  validation:</span><br><span class="line">    openAPIV3Schema:</span><br><span class="line">      properties:</span><br><span class="line">        spec:</span><br><span class="line">	  type: object</span><br><span class="line">          required:</span><br><span class="line">          - clusterType</span><br><span class="line">          - masterList</span><br><span class="line">          - nodeList</span><br><span class="line">          properties:</span><br><span class="line">            clusterType:</span><br><span class="line">              type: string</span><br><span class="line">            scaleUp:</span><br><span class="line">              type: integer</span><br><span class="line">            scaleDown:</span><br><span class="line">              type: integer</span><br><span class="line">              minimum: 0</span><br></pre></td></tr></table></figure>
-<p>上面是使用 OpenAPI v3 检验的一个例子，OpenAPI v3 仅支持一些简单的校验规则，可以校验参数的类型，参数值的类型(支持正则)，是否为必要参数等，但若要使用与、或、非等操作对多个字段同时校验还是做不到的，所以针对一些特定场景的校验需要使用 admission webhook。 </p>
-<h4 id="二、Admission-Webhooks"><a href="#二、Admission-Webhooks" class="headerlink" title="二、Admission Webhooks"></a>二、Admission Webhooks</h4><p>admission control 在 apiserver 中进行配置的，使用<code>--enable-admission-plugins</code> 或 <code>--admission-control</code>进行启用，admission control 配置的控制器列表是有顺序的，越靠前的越先执行，一旦某个控制器返回的结果是reject 的，那么整个准入控制阶段立刻结束，所以这里的配置顺序是有序的，建议使用官方的顺序配置。</p>
-<p>在 v1.9 中，admission webhook 是通过在 <code>--admission-control</code> 中配置 <code>ValidatingAdmissionWebhook</code> 或 <code>MutatingAdmissionWebhook</code> 来支持使用的，两者区别如下：</p>
+        <h3 id="为什么需要-service"><a href="#为什么需要-service" class="headerlink" title="为什么需要 service"></a>为什么需要 service</h3><p>在 kubernetes  中，当创建带有多个副本的 deployment 时，kubernetes 会创建出多个 pod，此时即一个服务后端有多个容器，那么在 kubernetes  中负载均衡怎么做，容器漂移后 ip 也会发生变化，如何做服务发现以及会话保持？这就是 service 的作用，service 是一组具有相同 label pod 集合的抽象，集群内外的各个服务可以通过 service 进行互相通信，当创建一个 service 对象时也会对应创建一个 endpoint 对象，endpoint 是用来做容器发现的，service 只是将多个 pod 进行关联，实际的路由转发都是由 kubernetes  中的 kube-proxy 组件来实现，因此，service 必须 kube-proxy 使用，kube-proxy 组件可以运行在 kubernetes 集群中的每一个节点上也可以只运行在单独的几个节点上，其会根据 service 和 endpoints 的变动来改变节点上 iptables 或者 ipvs 中保存的路由规则。</p>
+<h3 id="service-的工作原理"><a href="#service-的工作原理" class="headerlink" title="service 的工作原理"></a>service 的工作原理</h3><p><img src="http://cdn.tianfeiyu.com/service%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86.png" alt="service 原理"></p>
+<p>endpoints controller 是负责生成和维护所有 endpoints 对象的控制器，监听 service 和对应 pod 的变化，更新对应 service 的 endpoints 对象。当用户创建 service 后 endpoints controller 会监听 pod 的状态，当 pod 处于 running 且准备就绪时，endpoints controller 会将 pod ip 记录到 endpoints 对象中，因此，service 的容器发现是通过 endpoints 来实现的。而 kube-proxy 会监听 service 和 endpoints 的更新并调用其代理模块在主机上刷新路由转发规则。</p>
+<h3 id="service-的负载均衡"><a href="#service-的负载均衡" class="headerlink" title="service 的负载均衡"></a>service 的负载均衡</h3><p>上文已经提到 service 实际的路由转发都是由 kube-proxy 组件来实现的，service 仅以一种 VIP（ClusterIP） 的形式存在，kube-proxy 主要实现了集群内部从 pod 到 service 和集群外部从 nodePort 到 service 的访问，kube-proxy 的路由转发规则是通过其后端的代理模块实现的，kube-proxy 的代理模块目前有四种实现方案，userspace、iptables、ipvs、kernelspace，其发展历程如下所示：</p>
 <ul>
-<li>MutatingAdmissionWebhook：允许在 webhook 中对 object 进行 mutate 修改，但匹配到的 webhook <strong>串行</strong>执行，因为每个 webhook 都可能会 mutate object。</li>
-<li>ValidatingAdmissionWebhook: 不允许在 webhook 中对 Object 进行 mutate 修改，仅返回 true 或 false。</li>
+<li>kubernetes v1.0：services 仅是一个“4层”代理，代理模块只有 userspace</li>
+<li>kubernetes v1.1：Ingress API 出现，其代理“7层”服务，并且增加了 iptables 代理模块</li>
+<li>kubernetes v1.2：iptables 成为默认代理模式</li>
+<li>kubernetes v1.8：引入 ipvs 代理模块</li>
+<li>kubernetes v1.9：ipvs 代理模块成为 beta 版本</li>
+<li>kubernetes v1.11：ipvs 代理模式 GA</li>
 </ul>
-<p>启用 admission webhook 后，每次对 CR 做 CRUD 操作时，请求就会被 apiserver 拦住，至于 CRUD 中哪些请求被拦住都是提前在 WebhookConfiguration 中配置的，然后会调用 AdmissionWebhook 进行检查是否 Admit 通过。</p>
-<p><img src="http://cdn.tianfeiyu.com/1562032999173.jpg" alt="kubernetes API request lifecycle"></p>
-<h4 id="三、启用-Admission-Webhooks-功能"><a href="#三、启用-Admission-Webhooks-功能" class="headerlink" title="三、启用 Admission Webhooks 功能"></a>三、启用 Admission Webhooks 功能</h4><blockquote>
-<p>kubernetes 版本 &gt;= v1.9</p>
-</blockquote>
-<p>1、在 apiserver 中开启 admission webhooks</p>
-<p>在 v1.9 版本中使用的是：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota</span><br></pre></td></tr></table></figure>
-<p>在 v1.10 以后会弃用 <code>--admission-control</code>，取而代之的是  <code>--enable-admission-plugins</code>：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--enable-admission-plugins=NodeRestriction,NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota</span><br></pre></td></tr></table></figure>
-<p>启用之后在 api-resources 可以看到：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># kubectl api-resources | grep admissionregistration</span><br><span class="line">mutatingwebhookconfigurations                  admissionregistration.k8s.io   false        MutatingWebhookConfiguration</span><br><span class="line">validatingwebhookconfigurations                admissionregistration.k8s.io   false        ValidatingWebhookConfiguration</span><br></pre></td></tr></table></figure>
-<p>2、启用 <code>admissionregistration.k8s.io/v1alpha1</code> API</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//  检查 API 是否已启用</span><br><span class="line">$ kubectl api-versions | grep admissionregistration.k8s.io</span><br></pre></td></tr></table></figure>
-<p>若不存在则需要在 apiserver 的配置中添加<code>--runtime-config=admissionregistration.k8s.io/v1alpha1</code>。</p>
-<h4 id="四、编写-Admission-Webhook-Server"><a href="#四、编写-Admission-Webhook-Server" class="headerlink" title="四、编写 Admission Webhook Server"></a>四、编写 Admission Webhook Server</h4><p>webhook 其实就是一个 RESTful API 里面加上自己的一些校验逻辑。</p>
-<p>可以参考官方的示例：<br><a href="https://github.com/kubernetes/kubernetes/blob/v1.13.0/test/images/webhook/main.go" target="_blank" rel="noopener">https://github.com/kubernetes/kubernetes/blob/v1.13.0/test/images/webhook/main.go</a><br>或者<br><a href="https://github.com/kubernetes/kubernetes/blob/v1.13.0/test/e2e/apimachinery/webhook.go" target="_blank" rel="noopener">https://github.com/kubernetes/kubernetes/blob/v1.13.0/test/e2e/apimachinery/webhook.go</a></p>
-<blockquote>
-<p>完整代码参考：<a href="https://github.com/gosoon/admission-webhook" target="_blank" rel="noopener">https://github.com/gosoon/admission-webhook</a></p>
-</blockquote>
-<h4 id="五、部署-Admission-Webhook-Service"><a href="#五、部署-Admission-Webhook-Service" class="headerlink" title="五、部署 Admission Webhook Service"></a>五、部署 Admission Webhook Service</h4><p>由于 apiserver 调用 webhook 时强制使用 TLS 认证，所以 WebhookConfiguration 中一定要配置 caBundle，也就是需要自己生成一套私有证书。</p>
-<p>生成证书的方式比较多，以下使用 openssl 生成，脚本如下所示：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line"># Generate the CA cert and private key</span><br><span class="line">openssl req -nodes -new -x509 -days 365 -keyout ca.key -out ca.crt -subj &quot;/CN=admission-webhook CA&quot;</span><br><span class="line"></span><br><span class="line"># Generate the private key for the webhook server</span><br><span class="line">openssl genrsa -out admission-webhook-tls.key 2048</span><br><span class="line"></span><br><span class="line"># Generate a Certificate Signing Request (CSR) for the private key, and sign it with the private key of the CA.</span><br><span class="line">openssl req -new -key admission-webhook-tls.key -subj &quot;/CN=admission-webhook.ecs-system.svc&quot; \</span><br><span class="line">    | openssl x509 -days 365 -req -CA ca.crt -CAkey ca.key -CAcreateserial -out admission-webhook-tls.crt</span><br><span class="line"></span><br><span class="line"># Generate pem</span><br><span class="line">openssl base64 -A &lt; ca.crt &gt; ca.pem</span><br></pre></td></tr></table></figure>
-<p>生成证书后将 ca.pem 中的内容复制到 caBundle 处。</p>
-<p>ValidatingWebhook yaml 文件如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: admissionregistration.k8s.io/v1beta1</span><br><span class="line">kind: ValidatingWebhookConfiguration</span><br><span class="line">metadata:</span><br><span class="line">  name: admission-webhook</span><br><span class="line">webhooks:</span><br><span class="line">  - name: admission-webhook.ecs-system.svc  # 必须为 &lt;svc_name&gt;.&lt;svc_namespace&gt;.svc.</span><br><span class="line">    failurePolicy: Ignore</span><br><span class="line">    clientConfig:</span><br><span class="line">      service:</span><br><span class="line">        name: admission-webhook</span><br><span class="line">        namespace: ecs-system</span><br><span class="line">        path: /ecs/operator/cluster  # webhook controller</span><br><span class="line">      caBundle: xxx</span><br><span class="line">    rules:</span><br><span class="line">      - operations:   # 需要校验的方法</span><br><span class="line">        - CREATE</span><br><span class="line">        - UPDATE</span><br><span class="line">        apiGroups:    # api group</span><br><span class="line">        - ecs.yun.com</span><br><span class="line">        apiVersions:  # version</span><br><span class="line">        - v1</span><br><span class="line">        resources:    # resource</span><br><span class="line">        - kubernetesclusters</span><br></pre></td></tr></table></figure>
-<p>注意 <code>failurePolicy</code> 可以为 <code>Ignore</code>或者<code>Fail</code>，意味着如果和 webhook 通信出现问题导致调用失败，将根据 <code>failurePolicy</code>决定忽略失败（admit）还是准入失败(reject)。</p>
-<p>最后将 webhook 部署在集群中。</p>
-<p>参考：<br><a href="https://github.com/gosoon/admission-webhook" target="_blank" rel="noopener">https://github.com/gosoon/admission-webhook</a><br><a href="https://banzaicloud.com/blog/k8s-admission-webhooks/" target="_blank" rel="noopener">https://banzaicloud.com/blog/k8s-admission-webhooks/</a><br><a href="http://blog.fatedier.com/2019/03/20/k8s-crd/" target="_blank" rel="noopener">http://blog.fatedier.com/2019/03/20/k8s-crd/</a><br><a href="https://my.oschina.net/jxcdwangtao/blog/1591681" target="_blank" rel="noopener">https://my.oschina.net/jxcdwangtao/blog/1591681</a><br><a href="https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/" target="_blank" rel="noopener">https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/</a><br><a href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#is-there-a-recommended-set-of-admission-controllers-to-use" target="_blank" rel="noopener">https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#is-there-a-recommended-set-of-admission-controllers-to-use</a><br><a href="https://istio.io/zh/help/ops/setup/validation/" target="_blank" rel="noopener">https://istio.io/zh/help/ops/setup/validation/</a><br><a href="https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/" target="_blank" rel="noopener">https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/</a></p>
+<p>在每种模式下都有自己的负载均衡策略，下文会详解介绍。</p>
+<h4 id="userspace-模式"><a href="#userspace-模式" class="headerlink" title="userspace 模式"></a>userspace 模式</h4><p>在 userspace 模式下，访问服务的请求到达节点后首先进入内核 iptables，然后回到用户空间，由 kube-proxy 转发到后端的 pod，这样流量从用户空间进出内核带来的性能损耗是不可接受的，所以也就有了 iptables 模式。</p>
+<p>为什么 userspace 模式要建立 iptables 规则，因为 kube-proxy 监听的端口在用户空间，这个端口不是服务的访问端口也不是服务的 nodePort，因此需要一层 iptables 把访问服务的连接重定向给 kube-proxy 服务。</p>
+<p><img src="http://cdn.tianfeiyu.com/services-userspace-overview.svg" alt=""></p>
+<h4 id="iptables-模式"><a href="#iptables-模式" class="headerlink" title="iptables 模式"></a>iptables 模式</h4><p>iptables 模式是目前默认的代理方式，基于 netfilter 实现。当客户端请求 service 的 ClusterIP 时，根据 iptables 规则路由到各 pod 上，iptables 使用 DNAT 来完成转发，其采用了随机数实现负载均衡。</p>
+<p>iptables 模式与 userspace 模式最大的区别在于，iptables 模块使用 DNAT 模块实现了 service 入口地址到 pod 实际地址的转换，免去了一次内核态到用户态的切换，另一个与 userspace 代理模式不同的是，如果 iptables 代理最初选择的那个 pod 没有响应，它不会自动重试其他 pod。</p>
+<p>iptables 模式最主要的问题是在 service 数量大的时候会产生太多的 iptables 规则，使用非增量式更新会引入一定的时延，大规模情况下有明显的性能问题。</p>
+<p><img src="http://cdn.tianfeiyu.com/services-iptables-overview.svg" alt=""></p>
+<h4 id="ipvs-模式"><a href="#ipvs-模式" class="headerlink" title="ipvs 模式"></a>ipvs 模式</h4><p>当集群规模比较大时，iptables 规则刷新会非常慢，难以支持大规模集群，因其底层路由表的实现是链表，对路由规则的增删改查都要涉及遍历一次链表，ipvs 的问世正是解决此问题的，ipvs 是 LVS 的负载均衡模块，与 iptables 比较像的是，ipvs 的实现虽然也基于 netfilter 的钩子函数，但是它却使用哈希表作为底层的数据结构并且工作在内核态，也就是说 ipvs 在重定向流量和同步代理规则有着更好的性能，几乎允许无限的规模扩张。</p>
+<p>ipvs 支持三种负载均衡模式：DR模式（Direct Routing）、NAT 模式（Network Address Translation）、Tunneling（也称 ipip 模式）。三种模式中只有 NAT 支持端口映射，所以 ipvs 使用 NAT 模式。linux 内核原生的 ipvs 只支持 DNAT，当在数据包过滤，SNAT 和支持 NodePort 类型的服务这几个场景中ipvs 还是会使用 iptables。</p>
+<p>此外，ipvs 也支持更多的负载均衡算法，例如：</p>
+<ul>
+<li>rr：round-robin/轮询</li>
+<li>lc：least connection/最少连接</li>
+<li>dh：destination hashing/目标哈希</li>
+<li>sh：source hashing/源哈希</li>
+<li>sed：shortest expected delay/预计延迟时间最短</li>
+<li>nq：never queue/从不排队</li>
+</ul>
+<p>userspace、iptables、ipvs 三种模式中默认的负载均衡策略都是通过 round-robin 算法来选择后端 pod 的，在 service 中可以通过设置 <code>service.spec.sessionAffinity</code> 的值实现基于客户端 ip 的会话亲和性，<code>service.spec.sessionAffinity</code> 的值默认为”None”，可以设置为 “ClientIP”，此外也可以使用 <code>service.spec.sessionAffinityConfig.clientIP.timeoutSeconds</code> 设置会话保持时间。kernelspace 主要是在 windows 下使用的，本文暂且不谈。</p>
+<h3 id="service-的类型"><a href="#service-的类型" class="headerlink" title="service 的类型"></a>service 的类型</h3><p>service 支持的类型也就是 kubernetes 中服务暴露的方式，默认有四种 ClusterIP、NodePort、LoadBalancer、ExternelName，此外还有 Ingress，下面会详细介绍每种类型 service  的具体使用场景。</p>
+<h5 id="ClusterIP"><a href="#ClusterIP" class="headerlink" title="ClusterIP"></a>ClusterIP</h5><p>ClusterIP 类型的 service 是 kubernetes 集群默认的服务暴露方式，它只能用于集群内部通信，可以被各 pod 访问，其访问方式为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod ---&gt; ClusterIP:ServicePort --&gt; (iptables)DNAT --&gt; PodIP:containePort</span><br></pre></td></tr></table></figure>
+<p>ClusterIP Service 类型的结构如下图所示:</p>
+<p><img src="http://cdn.tianfeiyu.com/clusterIP.png" alt="ClusterIP"></p>
+<h5 id="NodePort"><a href="#NodePort" class="headerlink" title="NodePort"></a>NodePort</h5><p>如果你想要在集群外访问集群内部的服务，可以使用这种类型的 service，NodePort 类型的 service 会在集群内部署了 kube-proxy 的节点打开一个指定的端口，之后所有的流量直接发送到这个端口，然后会被转发到 service 后端真实的服务进行访问。Nodeport 构建在 ClusterIP 上，其访问链路如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client ---&gt; NodeIP:NodePort ---&gt; ClusterIP:ServicePort ---&gt; (iptables)DNAT ---&gt; PodIP:containePort</span><br></pre></td></tr></table></figure>
+<p> 其对应具体的 iptables 规则会在后文进行讲解。</p>
+<p>NodePort service 类型的结构如下图所示:</p>
+<p><img src="http://cdn.tianfeiyu.com/nodeport.png" alt="NodePort"></p>
+<h5 id="LoadBalancer"><a href="#LoadBalancer" class="headerlink" title="LoadBalancer"></a>LoadBalancer</h5><p>LoadBalancer 类型的 service 通常和云厂商的 LB 结合一起使用，用于将集群内部的服务暴露到外网，云厂商的 LoadBalancer 会给用户分配一个 IP，之后通过该 IP 的流量会转发到你的 service 上。</p>
+<p>LoadBalancer service 类型的结构如下图所示:</p>
+<p><img src="http://cdn.tianfeiyu.com/loadbalancer.png" alt="LoadBalancer"></p>
+<h5 id="ExternelName"><a href="#ExternelName" class="headerlink" title="ExternelName"></a>ExternelName</h5><p>通过 CNAME 将 service 与 externalName 的值(比如：foo.bar.example.com)映射起来，这种方式用的比较少。</p>
+<h5 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h5><p>Ingress 其实不是 service 的一个类型，但是它可以作用于多个 service，被称为 service 的 service，作为集群内部服务的入口，Ingress 作用在七层，可以根据不同的 url，将请求转发到不同的 service 上。</p>
+<p>Ingress 的结构如下图所示:</p>
+<p><img src="http://cdn.tianfeiyu.com/ingress.png" alt="Ingress"></p>
+<h3 id="service-的服务发现"><a href="#service-的服务发现" class="headerlink" title="service 的服务发现"></a>service 的服务发现</h3><p>虽然 service 的 endpoints 解决了容器发现问题，但不提前知道 service 的 Cluster IP，怎么发现 service 服务呢？service 当前支持两种类型的服务发现机制，一种是通过环境变量，另一种是通过 DNS。在这两种方案中，建议使用后者。</p>
+<h5 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h5><p>当一个 pod 创建完成之后，kubelet 会在该 pod 中注册该集群已经创建的所有 service 相关的环境变量，但是需要注意的是，在 service 创建之前的所有 pod 是不会注册该环境变量的，所以在平时使用时，建议通过 DNS 的方式进行 service 之间的服务发现。</p>
+<h5 id="DNS"><a href="#DNS" class="headerlink" title="DNS"></a>DNS</h5><p>可以在集群中部署 <a href="https://coredns.io/" target="_blank" rel="noopener">CoreDNS</a> 服务(旧版本的 kubernetes 群使用的是 kubeDNS)， 来达到集群内部的 pod 通过DNS 的方式进行集群内部各个服务之间的通讯。</p>
+<p>当前 kubernetes 集群默认使用 CoreDNS 作为默认的 DNS 服务，主要原因是 CoreDNS 是基于 Plugin 的方式进行扩展的，简单，灵活，并且不完全被Kubernetes所捆绑。</p>
+<h3 id="Service-的使用"><a href="#Service-的使用" class="headerlink" title="Service 的使用"></a>Service 的使用</h3><h5 id="ClusterIP-方式"><a href="#ClusterIP-方式" class="headerlink" title="ClusterIP 方式"></a>ClusterIP 方式</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: my-nginx</span><br><span class="line">spec:</span><br><span class="line">  clusterIP: 10.105.146.177</span><br><span class="line">  ports:</span><br><span class="line">  - port: 80</span><br><span class="line">    protocol: TCP</span><br><span class="line">    targetPort: 8080</span><br><span class="line">  selector:</span><br><span class="line">    app: my-nginx</span><br><span class="line">  sessionAffinity: None</span><br><span class="line">  type: ClusterIP</span><br></pre></td></tr></table></figure>
+<h5 id="NodePort-方式"><a href="#NodePort-方式" class="headerlink" title="NodePort 方式"></a>NodePort 方式</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: my-nginx</span><br><span class="line">spec:</span><br><span class="line">  ports:</span><br><span class="line">  - nodePort: 30090</span><br><span class="line">    port: 80</span><br><span class="line">    protocol: TCP</span><br><span class="line">    targetPort: 8080</span><br><span class="line">  selector:</span><br><span class="line">    app: my-nginx</span><br><span class="line">  sessionAffinity: None</span><br><span class="line">  type: NodePort</span><br></pre></td></tr></table></figure>
+<p>其中 <code>nodeport</code> 字段表示通过 nodeport 方式访问的端口，<code>port</code> 表示通过 service 方式访问的端口，<code>targetPort</code> 表示 container port。</p>
+<h5 id="Headless-service-就是没有-Cluster-IP-的-service"><a href="#Headless-service-就是没有-Cluster-IP-的-service" class="headerlink" title="Headless service(就是没有 Cluster IP 的 service )"></a>Headless service(就是没有 Cluster IP 的 service )</h5><p>当不需要负载均衡以及单独的 ClusterIP 时，可以通过指定 <code>spec.clusterIP</code> 的值为 <code>None</code> 来创建 Headless service，它会给一个集群内部的每个成员提供一个唯一的 DNS 域名来作为每个成员的网络标识，集群内部成员之间使用域名通信。    </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: my-nginx</span><br><span class="line">spec:</span><br><span class="line">  clusterIP: None</span><br><span class="line">  ports:</span><br><span class="line">  - nodePort: 30090</span><br><span class="line">    port: 80</span><br><span class="line">    protocol: TCP</span><br><span class="line">    targetPort: 8080</span><br><span class="line">  selector:</span><br><span class="line">    app: my-nginx</span><br></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>本文主要讲了 kubernetes 中 service 的原理、实现以及使用方式，service 目前主要有 5 种服务暴露方式，service 的容器发现是通过 endpoints 来实现的，其服务发现主要是通过 DNS 实现的，其负载均衡以及流量转发是通过 kube-proxy 实现的。在后面的文章我会继续介绍 kube-proxy 的设计及实现。</p>
+<p>参考：</p>
+<p><a href="https://www.cnblogs.com/xzkzzz/p/9559362.html" target="_blank" rel="noopener">https://www.cnblogs.com/xzkzzz/p/9559362.html</a></p>
+<p><a href="https://xigang.github.io/2019/07/21/kubernetes-service/" target="_blank" rel="noopener">https://xigang.github.io/2019/07/21/kubernetes-service/</a></p>
 
       
     </div>
@@ -435,9 +459,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/crd/" rel="tag"># crd</a>
-          
-            <a href="/tags/admission-control/" rel="tag"># admission control</a>
+            <a href="/tags/kubernetes-service/" rel="tag"># kubernetes service</a>
           
         </div>
       
@@ -450,8 +472,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/06/22/golang_modules/" rel="next" title="使用 Go Modules 管理依赖">
-                <i class="fa fa-chevron-left"></i> 使用 Go Modules 管理依赖
+              <a href="/2019/10/24/kube_scheduler_preempt/" rel="next" title="kube-scheduler 优先级与抢占机制源码分析">
+                <i class="fa fa-chevron-left"></i> kube-scheduler 优先级与抢占机制源码分析
               </a>
             
           </div>
@@ -459,10 +481,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/07/12/k8s_components_ha/" rel="prev" title="部署高可用 kubernetes 集群">
-                部署高可用 kubernetes 集群 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -589,7 +607,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#一、OpenAPI-v3-schema"><span class="nav-number">1.</span> <span class="nav-text">一、OpenAPI v3 schema</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二、Admission-Webhooks"><span class="nav-number">2.</span> <span class="nav-text">二、Admission Webhooks</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三、启用-Admission-Webhooks-功能"><span class="nav-number">3.</span> <span class="nav-text">三、启用 Admission Webhooks 功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四、编写-Admission-Webhook-Server"><span class="nav-number">4.</span> <span class="nav-text">四、编写 Admission Webhook Server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#五、部署-Admission-Webhook-Service"><span class="nav-number">5.</span> <span class="nav-text">五、部署 Admission Webhook Service</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么需要-service"><span class="nav-number">1.</span> <span class="nav-text">为什么需要 service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#service-的工作原理"><span class="nav-number">2.</span> <span class="nav-text">service 的工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#service-的负载均衡"><span class="nav-number">3.</span> <span class="nav-text">service 的负载均衡</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#userspace-模式"><span class="nav-number">3.1.</span> <span class="nav-text">userspace 模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#iptables-模式"><span class="nav-number">3.2.</span> <span class="nav-text">iptables 模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ipvs-模式"><span class="nav-number">3.3.</span> <span class="nav-text">ipvs 模式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#service-的类型"><span class="nav-number">4.</span> <span class="nav-text">service 的类型</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#ClusterIP"><span class="nav-number">4.0.1.</span> <span class="nav-text">ClusterIP</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NodePort"><span class="nav-number">4.0.2.</span> <span class="nav-text">NodePort</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#LoadBalancer"><span class="nav-number">4.0.3.</span> <span class="nav-text">LoadBalancer</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ExternelName"><span class="nav-number">4.0.4.</span> <span class="nav-text">ExternelName</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Ingress"><span class="nav-number">4.0.5.</span> <span class="nav-text">Ingress</span></a></li></ol></li></ol><li class="nav-item nav-level-3"><a class="nav-link" href="#service-的服务发现"><span class="nav-number">5.</span> <span class="nav-text">service 的服务发现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#环境变量"><span class="nav-number">5.0.1.</span> <span class="nav-text">环境变量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#DNS"><span class="nav-number">5.0.2.</span> <span class="nav-text">DNS</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Service-的使用"><span class="nav-number">6.</span> <span class="nav-text">Service 的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#ClusterIP-方式"><span class="nav-number">6.0.1.</span> <span class="nav-text">ClusterIP 方式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NodePort-方式"><span class="nav-number">6.0.2.</span> <span class="nav-text">NodePort 方式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Headless-service-就是没有-Cluster-IP-的-service"><span class="nav-number">6.0.3.</span> <span class="nav-text">Headless service(就是没有 Cluster IP 的 service )</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></div>
             
 
           </div>
