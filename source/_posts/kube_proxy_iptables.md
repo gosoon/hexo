@@ -184,6 +184,8 @@ INPUT --> KUBE-SERVICE --> KUBE-NODEPORTS --> KUBE-SVC-XXX --> KUBE-SEP-XXX
 
 ### iptables 模式源码分析
 
+> kubernetes 版本：v1.16 
+
 上篇文章已经在源码方面做了许多铺垫，下面就直接看 kube-proxy iptables 模式的核心方法。首先回顾一下 iptables 模式的调用流程，kube-proxy 根据给定的 proxyMode 初始化对应的 proxier 后会调用 `Proxier.SyncLoop()` 执行 proxier 的主循环，而其最终会调用 `proxier.syncProxyRules()` 刷新 iptables 规则。
 
 ```
@@ -436,7 +438,7 @@ func (proxier *Proxier) syncProxyRules() {
 
 写入负载均衡和 DNAT 规则，对于 endpoints 中的 pod 使用随机访问负载均衡策略。
 - 在 iptables 规则中加入该 service 对应的自定义链“KUBE-SVC-xxx”，如果该服务对应的 endpoints 大于等于2，则添加负载均衡规则；
-- 针对非本地 Node 上的 pod，需进行 DNAT，将请求的目标地址设置成后选的 pod 的 IP 后进行路由，KUBE-MARK-MASQ 将重设(伪装)源地址；
+- 针对非本地 Node 上的 pod，需进行 DNAT，将请求的目标地址设置成候选的 pod 的 IP 后进行路由，KUBE-MARK-MASQ 将重设(伪装)源地址；
 
 ```
         for i, endpointChain := range endpointChains {
@@ -583,7 +585,7 @@ func (proxier *Proxier) syncProxyRules() {
 
 ### 总结
 
-本文主要讲了 kube-proxy  iptables 模式的实现，可以看到其中的 iptables 规则是相当复杂的，在实际环境中尽量根据已有服务再来梳理整个 iptables 规则链就比较清楚了，笔者对于 iptables 的只是也是现学的，文中如有不当之处望指正。上面分析完了整个 iptables 模式的功能，但是 iptable 存在一些性能问题，比如有规则线性匹配时延、规则更新时延、可扩展性差等，为了解决这些问题于是有了 ipvs 模式，在下篇文章中会继续介绍 ipvs 模式的实现。
+本文主要讲了 kube-proxy  iptables 模式的实现，可以看到其中的 iptables 规则是相当复杂的，在实际环境中尽量根据已有服务再来梳理整个 iptables 规则链就比较清楚了，笔者对于 iptables 的知识也是现学的，文中如有不当之处望指正。上面分析完了整个 iptables 模式的功能，但是 iptable 存在一些性能问题，比如有规则线性匹配时延、规则更新时延、可扩展性差等，为了解决这些问题于是有了 ipvs 模式，在下篇文章中会继续介绍 ipvs 模式的实现。
 
 
 

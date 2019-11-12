@@ -500,18 +500,13 @@ func pickOneNodeForPreemption(nodesToVictims map[*v1.Node]*schedulerapi.Victims)
 1、创建 PriorityClass 对象：
 
 ```
-apiVersion: v1
-kind: Pod
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
 metadata:
-  name: nginx
-  labels:
-    env: test
-spec:
-  containers:
-  - name: nginx
-    image: nginx
-    imagePullPolicy: IfNotPresent
-  priorityClassName: high-priority
+  name: high-priority
+value: 1000000
+globalDefault: false
+description: "This priority class should be used for XYZ service pods only."
 ```
 
 
