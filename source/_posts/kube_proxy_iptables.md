@@ -93,7 +93,7 @@ PREROUTING --> KUBE-SERVICE --> KUBE-SVC-XXX --> KUBE-SEP-XXX
 2、本机访问
 
 ```
-INPUT --> KUBE-SERVICE --> KUBE-SVC-XXX --> KUBE-SEP-XXX
+OUTPUT --> KUBE-SERVICE --> KUBE-SVC-XXX --> KUBE-SEP-XXX
 ```
 
 访问流程如下所示：
@@ -142,7 +142,7 @@ PREROUTING --> KUBE-SERVICE --> KUBE-NODEPORTS --> KUBE-SVC-XXX --> KUBE-SEP-XXX
 2、本机访问
 
 ```
-INPUT --> KUBE-SERVICE --> KUBE-NODEPORTS --> KUBE-SVC-XXX --> KUBE-SEP-XXX
+OUTPUT --> KUBE-SERVICE --> KUBE-NODEPORTS --> KUBE-SVC-XXX --> KUBE-SEP-XXX
 ```
 
 该服务的 nodePort 端口为 30070，其 iptables 访问规则和使用 clusterIP 方式访问有点类似，不过 nodePort 方式会比 clusterIP 的方式多走一条链 KUBE-NODEPORTS，其会在 KUBE-NODEPORTS 链设置 mark 标记并转发到 KUBE-SVC-5SB6FTEHND4GTL2W，nodeport 与 clusterIP 访问方式最后都是转发到了 KUBE-SVC-xxx 链。

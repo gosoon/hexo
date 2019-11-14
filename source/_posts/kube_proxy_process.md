@@ -325,7 +325,7 @@ type Provider interface {
 }
 ```
 
-首先要实现 service、endpoints 和 endpointSlice 对应的 handler，也就是对 `OnAdd`、`OnUpdate`、`OnDelete` 、`OnSynced` 四种方法的处理，详细的代码在下文进行讲解。EndpointSlice 是在 v1.6 中新加入的一个 API。`Sync()` 和 `SyncLoop()` 是主要用来处理路由规则的方法。
+首先要实现 service、endpoints 和 endpointSlice 对应的 handler，也就是对 `OnAdd`、`OnUpdate`、`OnDelete` 、`OnSynced` 四种方法的处理，详细的代码在下文进行讲解。EndpointSlice 是在 v1.16 中新加入的一个 API。`Sync()` 和 `SyncLoop()` 是主要用来处理iptables 规则的方法。
 
 
 
@@ -376,7 +376,7 @@ func NewProxier(ipt utiliptables.Interface,
     burstSyncs := 2
 
     // 4.初始化 syncRunner，BoundedFrequencyRunner 是一个定时执行器，会定时执行
-    // proxier.syncProxyRules 方法,syncProxyRules 是每个 proxier 实际刷新路由规则的方法
+    // proxier.syncProxyRules 方法,syncProxyRules 是每个 proxier 实际刷新iptables 规则的方法
     proxier.syncRunner = async.NewBoundedFrequencyRunner("sync-runner", proxier.syncProxyRules, minSyncPeriod, syncPeriod, burstSyncs)
     return proxier, nil
 }
@@ -389,7 +389,7 @@ func NewProxier(ipt utiliptables.Interface,
 ipvs `NewProxier()` 方法主要逻辑为：
 
 - 设定内核参数，`route_localnet`、`br_netfilter`、`bridge-nf-call-iptables`、`conntrack`、`conn_reuse_mode`、`ip_forward`、`arp_ignore`、`arp_announce` 等
-- 和 iptables 一样，对于 SNAT 路由规则生成 masquerade 标记
+- 和 iptables 一样，对于 SNAT iptables 规则生成 masquerade 标记
 - 设置默认调度算法 rr
 - 初始化 proxier 对象
 - 初始化 ipset 规则
@@ -577,7 +577,7 @@ func (proxier *Proxier) OnEndpointSlicesSynced() {
 }
 ```
 
-在启动逻辑的 `Run()` 方法中 proxier 已经被注册到了 serviceConfig、endpointsConfig、endpointSliceConfig 中，当启动 informer，cache 同步完成后会调用 `OnSynced()`  方法，之后当 watch 到变化后会调用 proxier 中对应的 `OnUpdate()` 方法进行处理，`OnSynced()` 会直接调用 `proxier.syncProxyRules()` 来刷新路由规则，而 `OnUpdate()` 会调用 `proxier.syncRunner.Run()` 方法，其最终也是调用 `proxier.syncProxyRules()` 方法刷新规则的，这种转换是在 `BoundedFrequencyRunner` 中体现出来的，下面看一下具体实现。
+在启动逻辑的 `Run()` 方法中 proxier 已经被注册到了 serviceConfig、endpointsConfig、endpointSliceConfig 中，当启动 informer，cache 同步完成后会调用 `OnSynced()`  方法，之后当 watch 到变化后会调用 proxier 中对应的 `OnUpdate()` 方法进行处理，`OnSynced()` 会直接调用 `proxier.syncProxyRules()` 来刷新iptables 规则，而 `OnUpdate()` 会调用 `proxier.syncRunner.Run()` 方法，其最终也是调用 `proxier.syncProxyRules()` 方法刷新规则的，这种转换是在 `BoundedFrequencyRunner` 中体现出来的，下面看一下具体实现。
 
 
 
@@ -689,7 +689,7 @@ func (bfr *BoundedFrequencyRunner) Run() {
 
 
 
-而 `tryRun()` 方法才是最终调用 `syncProxyRules()` 刷新路由规则的。
+而 `tryRun()` 方法才是最终调用 `syncProxyRules()` 刷新iptables 规则的。
 
 `k8s.io/kubernetes/pkg/util/async/bounded_frequency_runner.go:211`
 
@@ -699,7 +699,7 @@ func (bfr *BoundedFrequencyRunner) tryRun() {
     defer bfr.mu.Unlock()
 
     if bfr.limiter.TryAccept() {
-        // 执行 fn() 即 syncProxyRules() 刷新路由规则
+        // 执行 fn() 即 syncProxyRules() 刷新iptables 规则
         bfr.fn()
         bfr.lastRun = bfr.timer.Now()
         bfr.timer.Stop()
@@ -720,10 +720,10 @@ func (bfr *BoundedFrequencyRunner) tryRun() {
 
 
 
-通过以上分析可知，`syncProxyRules()` 是每个 proxier 的核心方法，启动 informer cache 同步完成后会直接调用 `proxier.syncProxyRules()` 刷新路由规则，之后如果 informer watch 到相关对象的变化后会调用 `BoundedFrequencyRunner` 的 `tryRun()`来刷新路由规则，定时器每 30s 会执行一次路由规则的刷新。
+通过以上分析可知，`syncProxyRules()` 是每个 proxier 的核心方法，启动 informer cache 同步完成后会直接调用 `proxier.syncProxyRules()` 刷新iptables 规则，之后如果 informer watch 到相关对象的变化后会调用 `BoundedFrequencyRunner` 的 `tryRun()`来刷新iptables 规则，定时器每 30s 会执行一次iptables 规则的刷新。
 
 
 
 ## 总结
 
-本文主要介绍了 kube-proxy 的启动逻辑以及三种模式 proxier 的初始化，还有最终调用刷新路由规则的 BoundedFrequencyRunner，可以看到其中的代码写的很巧妙。而每种模式下的路由规则是如何创建、刷新以及转发的是如何实现的会在后面的文章中进行分析。
+本文主要介绍了 kube-proxy 的启动逻辑以及三种模式 proxier 的初始化，还有最终调用刷新iptables 规则的 BoundedFrequencyRunner，可以看到其中的代码写的很巧妙。而每种模式下的iptables 规则是如何创建、刷新以及转发的是如何实现的会在后面的文章中进行分析。
