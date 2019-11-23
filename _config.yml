@@ -88,3 +88,10 @@ search:
   format: html
   limit: 10000
 
+archive_generator:
+  per_page: 20  
+  yearly: true  
+  monthly: true 
+
+tag_generator:
+  per_page: 10

@@ -85,12 +85,12 @@ kubernetes 自定义链中数据包的详细流转可以参考：
 创建一个 clusterIP 访问方式的 service 以及带有两个副本，从 pod 中访问 clusterIP 的 iptables 规则流向为：
 
 ```
-OUTPUT --> KUBE-SERVICE --> KUBE-SVC-XXX --> KUBE-SEP-XXX
+PREROUTING --> KUBE-SERVICE --> KUBE-SVC-XXX --> KUBE-SEP-XXX
 ```
 
 访问流程如下所示：
 
-- 1、对于进入 OUTPUT 链的都转到 KUBE-SERVICES 链进行处理；
+- 1、对于进入 PREROUTING 链的都转到 KUBE-SERVICES 链进行处理；
 - 2、在 KUBE-SERVICES 链，对于访问 clusterIP 为 10.110.243.155 的转发到 KUBE-SVC-5SB6FTEHND4GTL2W； 
 - 3、访问 KUBE-SVC-5SB6FTEHND4GTL2W 的使用随机数负载均衡，并转发到 KUBE-SEP-CI5ZO3FTK7KBNRMG 和 KUBE-SEP-OVNLTDWFHTHII4SC 上；
 - 4、KUBE-SEP-CI5ZO3FTK7KBNRMG 和 KUBE-SEP-OVNLTDWFHTHII4SC 对应 endpoint 中的 pod 192.168.137.147 和 192.168.98.213，设置 mark 标记，进行 DNAT 并转发到具体的 pod 上，如果某个 service 的 endpoints 中没有 pod，那么针对此 service 的请求将会被 drop 掉；
