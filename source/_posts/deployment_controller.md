@@ -1132,7 +1132,7 @@ newRSUnavailablePodCount := *(newRS.Spec.Replicas) - newRS.Status.AvailableRepli
 maxScaledDown := allPodsCount - minAvailable - newRSUnavailablePodCount
 ```
 
-allPodsCount 是 allRSs 的 replicas 之和此时为 13，minAvailable 为 8 ，newRSUnavailablePodCount 此时不确定，但是值在 [0,3] 中，此时假设 newRS 的三个 pod 还处于 containerCreating 状态，则newRSUnavailablePodCount 为 0，根据以上公式计算所知 maxScaledDown 为 2，则 oldRS 需要 scale down 2 个 pod，其 replicas 需要改为 8，此时该 syncLoop 完成。下一个 syncLoop 时在 scaleUp 处计算得知 scaleUpCount = maxTotalPods - currentPodCount，13-3-8=2， 此时 newRS 需要更新 replicase 增加 2。以此轮询直到 newRS replicas 扩容到 10，oldRSs replicas 缩容至 0。
+allPodsCount 是 allRSs 的 replicas 之和此时为 13，minAvailable 为 8 ，newRSUnavailablePodCount 此时不确定，但是值在 [0,3] 中，此时假设 newRS 的三个 pod 还处于 containerCreating 状态，则newRSUnavailablePodCount 为 3，根据以上公式计算所知 maxScaledDown 为 2，则 oldRS 需要 scale down 2 个 pod，其 replicas 需要改为 8，此时该 syncLoop 完成。下一个 syncLoop 时在 scaleUp 处计算得知 scaleUpCount = maxTotalPods - currentPodCount，13-3-8=2， 此时 newRS 需要更新 replicase 增加 2。以此轮询直到 newRS replicas 扩容到 10，oldRSs replicas 缩容至 0。
 
 
 
