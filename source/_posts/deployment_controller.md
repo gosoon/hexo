@@ -117,8 +117,13 @@ $ kubectl rollout resume deploy nginx-deployment
 ##### 删除
 
 ```
+// 级联删除
 $ kubectl delete deployment nginx-deployment
+
+// 非级联删除
+$ kubectl delete deployment nginx-deployment --cascade=false
 ```
+
 
 以上是 deployment 的几个常用操作，下面会结合源码分析这几个操作都是如何实现的。
 
