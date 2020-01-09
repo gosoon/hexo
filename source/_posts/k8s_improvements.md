@@ -94,7 +94,7 @@ controller-manager 中存储的对象非常多，每次升级过程中从 apiser
 
 通过此方案 controller-manager 中断时间降低到秒级别(升级时 < 2s)，即使在异常宕机时，备仅需等待 leader lease 的过期(默认 15s)，无需要花费几分 钟重新同步数据。通过这个增强，显著的降低了 controller-manager MTTR（平均恢复时间），同时降低了 controller-manager 恢复时对 apiserver 的性能冲击。
 
-此方案需要对 controller-manager 上面两处的代码进行修改，controller-manager 默认的启动方式是先拿到锁然后 callback run 方法，在 run 方法中会启动 informers 然后同步对象，在停止时也要改为主动释放 leader release。
+此方案需要对 controller-manager 上面两处的代码进行修改，controller-manager 默认的启动方式是先拿到锁然后 callback run 方法，在 run 方法中会启动 informers 然后同步对象，在停止时也要改为主动释放 leader lease。
 
 
 
@@ -137,7 +137,7 @@ controller-manager 中存储的对象非常多，每次升级过程中从 apiser
 
 ### 五、kubelet 优化
 
-#### 1、使用 node release 减少心跳上报频率
+#### 1、使用 node lease 减少心跳上报频率
 
 在大规模场景下，大量 node 的心跳汇报严重影响了 node 的 watch，apiserver 处理心跳请求也需要非常大的开销。而开启 nodeLease 之后，kubelet 会使用非常轻量的 nodeLease 对象 (0.1 KB) 更新请求替换老的 Update Node Status 方式，这会大大减轻 apiserver 的负担。
 
