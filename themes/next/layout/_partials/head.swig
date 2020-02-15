@@ -150,6 +150,7 @@
   };
 </script>
 
+
 {# Canonical, good for google search engine (SEO) : https://support.google.com/webmasters/answer/139066 #}
 {% if theme.canonical %}
   <link rel="canonical" href="{{ config.url }}/{{ page.canonical_path.replace('index.html', '') }}"/>
@@ -157,4 +158,3 @@
 
 {% include 'head/custom-head.swig' %}
 
-<script data-ad-client="ca-pub-8588056830970747" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
