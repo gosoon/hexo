@@ -32,6 +32,7 @@
           <div id="content" class="content">
             {% block content %}{% endblock %}
           </div>
+          {% include 'google_adsense.swig' %}
           {% include '_third-party/duoshuo-hot-articles.swig' %}
           {% include '_partials/comments.swig' %}
         </div>
