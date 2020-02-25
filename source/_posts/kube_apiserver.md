@@ -135,7 +135,7 @@ APIExtensionServer 作为 Delegation 链的最后一层，是处理所有用户�
 - 1、`openapiController`：将 crd 资源的变化同步至提供的 OpenAPI 文档，可通过访问 `/openapi/v2` 进行查看；
 - 2、`crdController`：负责将 crd 信息注册到 apiVersions 和 apiResources 中，两者的信息可通过 `$ kubectl api-versions` 和  `$ kubectl api-resources` 查看；
 - 3、`namingController`：检查 crd obj 中是否有命名冲突，可在 crd `.status.conditions` 中查看；
-- 4、`establishingController`：检查 crd 是够处于正常状态，可在 crd `.status.conditions` 中查看；
+- 4、`establishingController`：检查 crd 是否处于正常状态，可在 crd `.status.conditions` 中查看；
 - 5、`nonStructuralSchemaController`：检查 crd obj  结构是否正常，可在 crd `.status.conditions` 中查看；
 - 6、`apiApprovalController`：检查 crd 是否遵循 kubernetes API 声明策略，可在 crd `.status.conditions` 中查看；
 - 7、`finalizingController`：类似于 finalizes 的功能，与 CRs 的删除有关；
@@ -1603,8 +1603,6 @@ https://bbbmj.github.io/2019/04/13/Kubernetes/code-analytics/kube-apiserver/
 https://mp.weixin.qq.com/s/TQuqAAzBjeWHwKPJZ3iJhA
 
 https://blog.openshift.com/kubernetes-deep-dive-api-server-part-1/
-
-[https://github.com/Kevin-fqh/learning-k8s-source-code/blob/master/apiserver/(14)%20storage%E6%9C%BA%E5%88%B6.md](https://github.com/Kevin-fqh/learning-k8s-source-code/blob/master/apiserver/(14)%20storage%E6%9C%BA%E5%88%B6.md)
 
 https://www.jianshu.com/p/daa4ff387a78
 
