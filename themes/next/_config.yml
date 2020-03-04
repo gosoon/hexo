@@ -99,6 +99,7 @@ menu:
   #categories: /categories/ || th
   archives: /archives/ || archive
   ebook: /source-code-reading-notes/ || book
+  rss: /atom.xml || rss
   #schedule: /schedule/ || calendar
   #sitemap: /sitemap.xml || sitemap
   #commonweal: /404/ || heartbeat
