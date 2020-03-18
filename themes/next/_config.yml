@@ -47,6 +47,8 @@ footer:
   # If not defined, current year will be used.
   #since: 2015
 
+
+
   # Icon between year and copyright info.
   icon: user
 
@@ -64,6 +66,10 @@ footer:
   # -------------------------------------------------------------
   # Any custom text can be defined here.
   #custom_text: Hosted by <a target="_blank" href="https://pages.github.com">GitHub Pages</a>
+
+  beian:
+    enable: true
+    icp: 陕ICP备15001765号-1
 
 # ---------------------------------------------------------------
 # SEO Settings
