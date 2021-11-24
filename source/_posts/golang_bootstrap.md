@@ -377,3 +377,5 @@ https://zboya.github.io/post/go_scheduler/#mstartfn
 https://blog.csdn.net/yockie/article/details/79166713
 
 https://blog.csdn.net/ocean_1996/article/details/107088530
+
+https://chao-tic.github.io/blog/2018/12/25/tls#the-assembly
