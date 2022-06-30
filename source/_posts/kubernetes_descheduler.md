@@ -6,17 +6,6 @@ type: "kubernetes"
 
 ---
 
-* [Descheduler 组件简介](#descheduler-组件简介)
-* [Descheduler 策略介绍](#descheduler-策略介绍)
-* [Descheduler 功能扩展](#descheduler-功能扩展)
-   * [LowNodeUtilization 策略扩展](#lownodeutilization-策略扩展)
-      * [1、通过告警回调触发](#1通过告警回调触发)
-      * [2、节点利用率预测](#2节点利用率预测)
-   * [HighNodeUtilization 策略扩展](#highnodeutilization-策略扩展)
-* [Descheduler Pod 迁移场景中的约束策略](#descheduler-pod-迁移场景中的约束策略)
-* [Descheduler Pod 迁移的效果分析](#descheduler-pod-迁移的效果分析)
-* [总结](#总结)
-
 
 
 ### Descheduler 组件简介
