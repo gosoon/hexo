@@ -66,13 +66,13 @@ kubelet 可以通过参数 `--eviction-hard` 来配置以上几个参数的阈�
 
 **1、kubelet 不会实时感知到节点内存数据的变化**
 
-kubelet 定期通过 cadvisor 接口采集节点内存使用数据，当节点短时间内内存使用率突增，此时 kubelet 无法感知到也不会有 MemoryPressure 相关事件，但依然会调用 OOMKiller 停止容器。可以通过为 kubelet 配置 `--kernel-memcg-notification` 参数启用 memcg api，当触发memory 使用率阈值时 memcg 会主动进行通知；
+kubelet 定期通过 cadvisor 接口采集节点内存使用数据，当节点短时间内内存使用率突增，此时 kubelet 无法感知到也不会有 MemoryPressure 相关事件，但依然会调用 OOMKiller 停止容器。可以通过为 kubelet 配置 `--kernel-memcg-notification` 参数启用 memcg api，当触发memory 使用率阈值时 memcg 会主动进行通知。
 
 memcg 主动通知的功能是 cgroup 中已有的，kubelet 会在 `/sys/fs/cgroup/memory/cgroup.event_control` 文件中写入 memory.available 的阈值，而阈值与 inactive_file 文件的大小有关系，kubelet 也会定期更新阈值，当 memcg 使用率达到配置的阈值后会主动通知 kubelet，kubelet 通过 epoll 机制来接收通知。
 
 **2、kubelet** **memory.available 不会计算 active page**
 
-kubelet 通过内存使用率驱逐实例时，内存使用率数据包含了 page cache 中 active_file 的数据，在某些场景下会因 page cache 过高导致内存使用率超过阈值会造成实例被驱逐，
+kubelet 通过内存使用率驱逐实例时，内存使用率数据包含了 page cache 中 active_file 的数据，在某些场景下会因 page cache 过高导致内存使用率超过阈值会造成实例被驱逐。
 
 由于在内存紧张时 inactive_file 会被内核首先回收，但在内存不足时，active_file 也会被内核进行回收，社区对此机制也有一些疑问，针对内核回收内存的情况比较复杂，社区暂时还未进行回应，详情可以参考 [kubelet counts active page cache against memory.available (maybe it shouldn't?)](https://github.com/kubernetes/kubernetes/issues/43916)。
 

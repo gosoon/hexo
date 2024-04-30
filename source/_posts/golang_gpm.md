@@ -386,7 +386,7 @@ type g struct {
     _defer    *_defer // 当前 g 中与 defer 相关的处理
     m         *m      // 绑定的 m
     
-    // 存储当前 Goroutine 调度相关的数据，上下方切换时会把当前信息保存到这里
+    // 存储当前 Goroutine 调度相关的数据，上下文切换时会把当前信息保存到这里
     sched     gobuf   
     
 		......
